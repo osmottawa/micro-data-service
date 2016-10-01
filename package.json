@@ -1,0 +1,62 @@
+{
+  "name": "micro-data-service",
+  "version": "0.1.0",
+  "description": "Hosts vector tiles to be used in conjuction with the OSM Tasking Manager.",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "npm run typings",
+    "typings": "./node_modules/typings/dist/bin.js install",
+    "test": "npm run build && npm run ava && npm run lint",
+    "docker-test": "docker build -t mds . && docker run --rm -it mds npm run test",
+    "build": "./node_modules/typescript/bin/tsc",
+    "ava": "./node_modules/nyc/bin/nyc.js ./node_modules/ava/cli.js",
+    "coverage": "./node_modules/nyc/bin/nyc.js ./node_modules/ava/cli.js",
+    "start": "./node_modules/ts-node/dist/bin.js app/cluster.ts",
+    "lint": "./node_modules/tslint/bin/tslint app/**.ts tests/**.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/osmottawa/micro-data-service.git"
+  },
+  "author": "Denis Carriere",
+  "contributors": [
+    "Denis Carriere <carriere.denis@gmail.com>"
+  ],
+  "bugs": {
+    "url": "https://github.com/osmottawa/micro-data-service/issues"
+  },
+  "homepage": "https://github.com/osmottawa/micro-data-service#readme",
+  "dependencies": {
+    "@turf/turf": "^3.5.2",
+    "@types/node-uuid": "0.0.28",
+    "body-parser": "^1.15.2",
+    "concaveman": "^1.1.0",
+    "debug": "^2.2.0",
+    "express": "^4.14.0",
+    "geojson2osm": "0.0.5",
+    "js-yaml": "^3.6.1",
+    "lodash": "^4.15.0",
+    "multer": "^1.2.0",
+    "node-uuid": "^1.4.7",
+    "request": "^2.74.0",
+    "request-promise": "^4.1.1",
+    "validator": "^5.6.0"
+  },
+  "devDependencies": {
+    "ava": "^0.16.0",
+    "coveralls": "^2.11.13",
+    "nyc": "^8.3.0",
+    "ts-node": "^1.3.0",
+    "tslint": "^3.15.1",
+    "typescript": "^2.0.3",
+    "typings": "^1.4.0"
+  },
+  "ava": {
+    "files": [
+      "tests/*.tests.js"
+    ],
+    "concurrency": 5,
+    "failFast": true,
+    "tap": true
+  }
+}

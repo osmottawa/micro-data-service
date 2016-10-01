@@ -1,0 +1,5 @@
+# ////////////////////////
+# DATASETS
+# ////////////////////////
+cecce-schools: 'https://github.com/osmottawa/imports/raw/master/CECCE/schools.geojson'
+oc-transpo-stops: 'https://github.com/osmottawa/imports/raw/master/octranspo/oc-transpo-stops.json'
