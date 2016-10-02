@@ -34,6 +34,7 @@
     "debug": "^2.2.0",
     "express": "^4.14.0",
     "geojson2osm": "0.0.5",
+    "global-mercator": "^1.0.4",
     "js-yaml": "^3.6.1",
     "lodash": "^4.15.0",
     "multer": "^1.2.0",

@@ -34,7 +34,7 @@ app.use((request: any, response: any, next: any) => {
 
 // Register Routes
 app.use('/', routes.api)
-app.use('/datasets', routes.datasets)
+app.use('/', routes.datasets)
 
 // Start Listening
 app.listen(PORT)

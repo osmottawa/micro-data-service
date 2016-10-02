@@ -17,10 +17,10 @@ router.route('/')
       http: {
         GET: [
           '/datasets',
-          '/datasets/<dataset>(.json|.geojson|.osm)',
-          '/datasets/<dataset>/extent(.json|.geojson|.osm)',
-          '/datasets/{zoom}/{x}/{y}/extent(.json|.geojson|.osm)',
-          '/datasets/{zoom}/{x}/{y}/<dataset>(.json|.geojson|.osm)',
+          '/<dataset>.(json|geojson|osm)',
+          '/<dataset>/extent.(json|geojson|osm)',
+          '/{zoom}/{x}/{y}/extent.(json|geojson|osm)',
+          '/{zoom}/{x}/{y}/<dataset>.(json|geojson|osm)',
         ],
       },
       ok: true,
