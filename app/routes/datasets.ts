@@ -76,7 +76,7 @@ router.route('/datasets')
 router.route('/:dataset:ext(.json|.geojson|.osm|)')
   .get(async (req: InterfaceRequest, res: Response) => {
     validateDataset(req, res)
-    const url = parseUrl(req)
+    parseUrl(req)
     const results: GeoJSON.FeatureCollection<any> = await datasets[req.params.dataset]
 
     return parseResults(results, req, res)
@@ -120,7 +120,7 @@ router.route('/:dataset/extent:ext(.json|.geojson|)')
  */
 router.route('/:zoom(\\d+)/:x(\\d+)/:y(\\d+)/extent:ext(.json|.geojson|.osm|)')
   .get((req: InterfaceRequest, res: Response) => {
-    const url = parseUrl(req)
+    parseUrl(req)
     const extent = getPolygon(req)
     const results = turf.featureCollection([extent])
 
