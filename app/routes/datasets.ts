@@ -162,13 +162,7 @@ router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
         return parseResults(results, req, res)
       })
       .catch(error => {
-        const message = {
-          status: 404,
-          error: error.message,
-          ok: false,
-        }
-        debug.error(message)
-        return res.status(404).json(message)
+        return parseResults(turf.featureCollection([]), req, res)
       })
   })
 
