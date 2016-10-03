@@ -7,6 +7,7 @@ import { geojson2osm } from 'geojson2osm'
 import * as concaveman from 'concaveman'
 import * as mercator from 'global-mercator'
 import { Tile } from 'global-mercator'
+import { keys } from 'lodash'
 
 const router = Router()
 export const cache: any = {}
@@ -71,7 +72,7 @@ interface InterfaceRequest extends Request {
  */
 router.route('/datasets')
   .all((req: Request, res: Response) => {
-    res.json(configs.datasets)
+    res.json(keys(datasets))
   })
 
 /**
