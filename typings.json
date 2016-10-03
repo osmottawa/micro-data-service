@@ -15,6 +15,7 @@
     "node": "registry:dt/node#6.0.0+20160928143418",
     "request": "registry:dt/request#0.0.0+20160726020908",
     "request-promise": "registry:dt/request-promise#3.0.0+20160906190103",
+    "sequelize": "registry:dt/sequelize#3.4.1+20160929080558",
     "serve-static": "registry:dt/serve-static#0.0.0+20160606155157",
     "tilebelt": "registry:dt/tilebelt#1.0.1+20160928122739",
     "turf": "registry:dt/turf#3.5.2+20160928151129",

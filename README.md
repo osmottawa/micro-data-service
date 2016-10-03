@@ -20,15 +20,28 @@ Using [`tippecanoe`](https://github.com/mapbox/tippecanoe) you can generate Vect
 
 ```bash
 $ tippecanoe \
-    --output=ottawa-buildings.mbtiles \
+    --output=ottawa-buildings-z14.mbtiles \
     --force \
-    --full-detail \
     --read-parallel \
     --layer data \
-    --maximum-zoom 12 \
-    --minimum-zoom 12 \
-    --base-zoom 12 \
-    buildings.json
+    --minimum-zoom 14 \
+    --maximum-zoom 14 \
+    --full-detail 18 \
+    --no-line-simplification \
+    --no-feature-limit \
+    --no-tile-size-limit \
+    --no-polygon-splitting \
+    --no-clipping \
+    --no-duplication \
+    buildings.geojson
+```
+
+Merge SQLite together
+
+```bash
+$ sqlite3 ottawa-buildings-z13.mbtiles '.dump' >> tmp
+$ sqlite3 ottawa-buildings-z14.mbtiles '.dump' >> tmp
+$ sqlite3 ottawa-buildings.mbtiles < 'tmp'
 ```
 
 ## Configure Server

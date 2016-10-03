@@ -6,6 +6,7 @@ import { configs, downloadDatasets } from '../configs'
 import { geojson2osm } from 'geojson2osm'
 import * as concaveman from 'concaveman'
 import * as mercator from 'global-mercator'
+import { Tile } from 'global-mercator'
 
 const router = Router()
 export const cache: any = {}
@@ -22,9 +23,12 @@ export function validateDataset(req: Request, res: Response) {
   }
 }
 
+export function getTile(req: Request): Tile {
+  return [Number(req.params.x), Number(req.params.y), Number(req.params.z)]
+}
+
 export function getPolygon(req: Request): GeoJSON.Feature<GeoJSON.Polygon> {
-  const tile: mercator.Tile = [Number(req.params.x), Number(req.params.y), Number(req.params.zoom)]
-  const poly = turf.bboxPolygon(mercator.tileToBBox(tile))
+  const poly = turf.bboxPolygon(mercator.tileToBBox(getTile(req)))
   poly.properties = {
     algorithm: 'Global Mercator',
     type: 'extent',
@@ -48,7 +52,7 @@ export function parseResults(results: GeoJSON.FeatureCollection<any>, req: Reque
   }
 }
 
-export function parseOSM(results: GeoJSON.FeatureCollection<any>): string {
+export function parseOSM(results: GeoJSON.FeatureCollection<any>) {
   return geojson2osm(results).replace(/changeset="false"/g, 'action=\"modifiy\"')
 }
 
@@ -118,7 +122,7 @@ router.route('/:dataset/extent:ext(.json|.geojson|)')
 /**
  * Retrieves Geographical Extent of Tile
  */
-router.route('/:zoom(\\d+)/:x(\\d+)/:y(\\d+)/extent:ext(.json|.geojson|.osm|)')
+router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/extent:ext(.json|.geojson|.osm|)')
   .get((req: InterfaceRequest, res: Response) => {
     parseUrl(req)
     const extent = getPolygon(req)
@@ -130,58 +134,11 @@ router.route('/:zoom(\\d+)/:x(\\d+)/:y(\\d+)/extent:ext(.json|.geojson|.osm|)')
 /**
  * Retrieves data within Tile
  */
-router.route('/:zoom(\\d+)/:tile_column(\\d+)/:tile_row(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
+router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
   .get(async (req: InterfaceRequest, res: Response) => {
     validateDataset(req, res)
-    const url = parseUrl(req)
-    const extent = getPolygon(req)
-
-    // Set up Cache
-    let results: GeoJSON.FeatureCollection<any> = cache[url]
-    debug.server(`cache: ${ !isUndefined(results) }`)
-
-    // Parse data without cache
-    if (isUndefined(results)) {
-      // Build Tile
-      const data: GeoJSON.FeatureCollection<any> = await datasets[req.params.dataset]
-
-      // Filter by Within or intersect
-      if (data.features[0].geometry.type === 'Point') {
-        debug.server('within')
-        results = turf.within(data, turf.featureCollection([extent]))
-
-      // Intersect by Polygons
-      } else {
-        debug.server('intersect')
-        const container: GeoJSON.Feature<any>[] = []
-        data.features.map(feature => {
-
-          // Parsing single Polygon
-          if (feature.geometry.type === 'Polygon' || feature.geometry.type === 'LineString') {
-            if (!!turf.intersect(feature, extent)) { container.push(feature) }
-
-          // Parsing Multi Polygon
-          } else if (feature.geometry.type === 'MultiPolygon') {
-            const multi: GeoJSON.Feature<GeoJSON.MultiPolygon> = feature
-            multi.geometry.coordinates.map(poly => {
-              const polygon = turf.polygon(poly)
-              if (!!turf.intersect(polygon, extent)) { container.push(polygon) }
-            })
-          } else {
-            return res.status(500).json({
-              error: 'Invalid dataset geometry',
-              message: `${ feature.geometry.type }: Dataset's geometry could not be parsed`,
-              ok: false,
-              status_code: 500,
-            })
-          }
-        })
-        results = turf.featureCollection(container)
-      }
-      // Store in Cache
-      cache[url] = results
-    }
-
+    const tile = getTile(req)
+    let results = await datasets[req.params.dataset].getTile(tile)
     return parseResults(results, req, res)
   })
 

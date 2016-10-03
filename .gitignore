@@ -10,6 +10,7 @@ pids
 
 typings
 
+*.mbtiles
 *.js
 *.js.map
 
