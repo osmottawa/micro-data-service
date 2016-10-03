@@ -14,6 +14,10 @@ interface InterfaceConfigs {
   server: any
 }
 
+interface InterfaceDatasets {
+  (key: string): any
+}
+
 const loadConfigs = () => {
   const configs: InterfaceConfigs = {
     server: {},
@@ -40,16 +44,29 @@ const loadConfigs = () => {
 //////////////////////////////////////
 // Download Datasets
 //////////////////////////////////////
-export const downloadDatasets = () => {
-  const datasets: any = {}
-  fs.readdirSync(path.join(__dirname, '..', 'data')).map(data => {
-    const [name, ext] = data.split('.')
-    if (ext === 'mbtiles') {
-      console.log(`[OK] Data loaded: ${ name }`)
-      datasets[name] = new MBTiles(path.join(__dirname, '..', 'data', data))
-    }
-  })
-  return datasets
+
+export class Datasets {
+  private _datasets: any
+
+  constructor() {
+    this._datasets = {}
+    this.load()
+  }
+
+  public get(name: string): MBTiles {
+    return this._datasets[name]
+  }
+
+  private load() {
+    fs.readdirSync(path.join(__dirname, '..', 'data')).map(data => {
+      const [name, ext] = data.split('.')
+      if (ext === 'mbtiles') {
+        debug.server(`[OK] Data loaded: ${ name }`)
+        const mbtiles = new MBTiles(path.join(__dirname, '..', 'data', data))
+        this._datasets[name] = mbtiles
+      }
+    })
+  }
 }
 export const configs = loadConfigs()
 export const PORT = (process.env.PORT) ? process.env.PORT : (configs.server.PORT) ? configs.server.PORT : 5000

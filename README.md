@@ -79,6 +79,22 @@ https://addxy.com/{z}/{x}/{y}/csd-schools.osm
 
 ```bash
 $ tippecanoe \
+    --output=ottawa-buildings-z13.mbtiles \
+    --force \
+    --minimum-zoom 13 \
+    --maximum-zoom 13 \
+    --full-detail 19 \
+    --no-line-simplification \
+    --no-feature-limit \
+    --no-tile-size-limit \
+    --no-polygon-splitting \
+    --no-clipping \
+    --no-duplication \
+    ottawa-buildings.geojson
+```
+
+```bash
+$ tippecanoe \
     --output=ottawa-buildings-z14.mbtiles \
     --force \
     --minimum-zoom 14 \
@@ -90,15 +106,32 @@ $ tippecanoe \
     --no-polygon-splitting \
     --no-clipping \
     --no-duplication \
-    buildings.geojson
+    ottawa-buildings.geojson
+```
+
+```bash
+$ tippecanoe \
+    --output=ottawa-buildings-z15.mbtiles \
+    --force \
+    --minimum-zoom 15 \
+    --maximum-zoom 15 \
+    --full-detail 17 \
+    --no-line-simplification \
+    --no-feature-limit \
+    --no-tile-size-limit \
+    --no-polygon-splitting \
+    --no-clipping \
+    --no-duplication \
+    ottawa-buildings.geojson
 ```
 
 Merge SQLite together
 
 ```bash
-$ sqlite3 ottawa-buildings-z13.mbtiles '.dump' >> tmp
-$ sqlite3 ottawa-buildings-z14.mbtiles '.dump' >> tmp
-$ sqlite3 ottawa-buildings.mbtiles < 'tmp'
+$ sqlite3 ottawa-buildings-z13.mbtiles '.dump' > tmp &&
+    sqlite3 ottawa-buildings-z14.mbtiles '.dump' >> tmp &&
+    sqlite3 ottawa-buildings-z15.mbtiles '.dump' >> tmp &&
+    sqlite3 ottawa-buildings.mbtiles < 'tmp'
 ```
 
 ## Configure Server
