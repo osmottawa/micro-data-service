@@ -7,4 +7,5 @@ services:
      - "5000:5000"
     volumes:
      - ./configs/:/app/configs/
+     - ./data/:/app/data/
      - ./app:/app/app/
