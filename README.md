@@ -18,21 +18,64 @@ $ npm start
 
 Using [`tippecanoe`](https://github.com/mapbox/tippecanoe) you can generate Vector Tiles based on your GeoJSON.
 
-**Point GeoJSON**
+**Log into server**
+
+```bash
+$ ssh root@addxy.com
+```
+
+You will be adding the Vector Tiles `.mbtiles` inside the `/data` folder.
+
+**Download new data**
+
+```bash
+$ cd micro-data-service/data
+$ wget https://raw.githubusercontent.com/osmottawa/imports/master/CSDraveurs/CSD-schools.json
+```
+
+**Convert GeoJSON Point to Vector Tile**
 
 ```bash
 $ tippecanoe \
-    --output=oc-transpo-stops.mbtiles \
+    --output=csd-schools.mbtiles \
     --force \
     --base-zoom 12 \
     --no-feature-limit \
     --no-tile-size-limit \
     --minimum-zoom 12 \
-    --maximum-zoom 15 \
-     oc-transpo-stops.geojson
+    --maximum-zoom 18 \
+    CSD-schools.json
 ```
 
-**Polygon GeoJSON**
+Restart the server.
+
+```bash
+$ docker-compose restart
+```
+
+You should now see your new dataset in the JSON.
+
+[https://addxy.com/datasets](https://addxy.com/datasets)
+
+```json
+[
+  "cecce-schools",
+  "csd-schools",
+  "oc-transpo-stops",
+  "ocsb-schools",
+  "ottawa-buildings"
+]
+```
+
+**Tasking Manager URL**
+
+https://addxy.com/{z}/{x}/{y}/csd-schools.osm
+
+**Import into JOSM URL**
+
+[http://localhost:8111/import?new_layer=true&url=https://addxy.com/{z}/{x}/{y}/csd-schools.osm](http://localhost:8111/import?new_layer=true&url=https://addxy.com/{z}/{x}/{y}/csd-schools.osm)
+
+**Polygon GeoJSON (Advanced)**
 
 ```bash
 $ tippecanoe \
@@ -65,12 +108,6 @@ Log in to the server.
 ```bash
 $ ssh root@addxy.com
 $ cd mobile-map-builder/
-```
-
-Update `datasets` configuraiton to add or update any new data by adding a URL.
-
-```bash
-$ nano configs/datasets.yml
 ```
 
 Restart Server using `docker-compose`
