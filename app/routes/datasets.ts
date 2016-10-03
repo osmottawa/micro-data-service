@@ -122,7 +122,7 @@ router.route('/:dataset/extent:ext(.json|.geojson|)')
 /**
  * Retrieves Geographical Extent of Tile
  */
-router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/extent:ext(.json|.geojson|.osm|)')
+router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)(/extent:ext(.json|.geojson|.osm|)|:ext(.json|.geojson|.osm|))')
   .get((req: InterfaceRequest, res: Response) => {
     parseUrl(req)
     const extent = getPolygon(req)
@@ -138,7 +138,7 @@ router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
   .get(async (req: InterfaceRequest, res: Response) => {
     validateDataset(req, res)
     const tile = getTile(req)
-    let results = await datasets[req.params.dataset].getTile(tile)
+    const results = await datasets[req.params.dataset].getTile(tile)
     return parseResults(results, req, res)
   })
 

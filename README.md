@@ -18,12 +18,26 @@ $ npm start
 
 Using [`tippecanoe`](https://github.com/mapbox/tippecanoe) you can generate Vector Tiles based on your GeoJSON.
 
+**Point GeoJSON**
+
+```bash
+$ tippecanoe \
+    --output=oc-transpo-stops.mbtiles \
+    --force \
+    --base-zoom 12 \
+    --no-feature-limit \
+    --no-tile-size-limit \
+    --minimum-zoom 12 \
+    --maximum-zoom 15 \
+     oc-transpo-stops.geojson
+```
+
+**Polygon GeoJSON**
+
 ```bash
 $ tippecanoe \
     --output=ottawa-buildings-z14.mbtiles \
     --force \
-    --read-parallel \
-    --layer data \
     --minimum-zoom 14 \
     --maximum-zoom 14 \
     --full-detail 18 \

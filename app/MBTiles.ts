@@ -1,5 +1,6 @@
 import * as Sequelize from 'sequelize'
 import { range } from 'global-mercator'
+import { keys } from 'lodash'
 import * as zlib from 'zlib'
 import * as turf from '@turf/turf'
 import * as mercator from 'global-mercator'
@@ -15,7 +16,7 @@ const VectorTile = require('vector-tile').VectorTile
  */
 export type Tile = [number, number, number]
 
-function gunzip(data: Buffer) {
+function gunzip(data: Buffer): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     zlib.gunzip(data, (err, buffer) => {
       return resolve(buffer)
@@ -30,14 +31,15 @@ function parseVectorTile(data: Buffer): Promise<any> {
   })
 }
 
-function readTileData(data: any) {
+function readTileData(data: InterfaceTilesInstance): Buffer {
   if (!data) { throw new Error('Tile has no data') }
   return data.tile_data
 }
 
 function parseGeoJSON(vt: any, tile: Tile) {
   const [x, y, z] = mercator.tileToGoogle(tile)
-  const layer = vt.layers.data
+  const layerName = keys(vt.layers)[0]
+  const layer = vt.layers[layerName]
   const collection = turf.featureCollection([])
   range(layer.length).map(i => {
     const geojson: GeoJSON.Feature<any> = layer.feature(i).toGeoJSON(x, y, z)

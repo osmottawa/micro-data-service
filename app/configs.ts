@@ -43,9 +43,11 @@ const loadConfigs = () => {
 export const downloadDatasets = () => {
   const datasets: any = {}
   fs.readdirSync(path.join(__dirname, '..', 'data')).map(data => {
-    const [name] = data.split('.')
-    console.log(name)
-    datasets[name] = new MBTiles(path.join(__dirname, '..', 'data', data))
+    const [name, ext] = data.split('.')
+    if (ext === 'mbtiles') {
+      console.log(`[OK] Data loaded: ${ name }`)
+      datasets[name] = new MBTiles(path.join(__dirname, '..', 'data', data))
+    }
   })
   return datasets
 }
