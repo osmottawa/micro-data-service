@@ -10,8 +10,8 @@ import { Tile } from 'global-mercator'
 import { keys } from 'lodash'
 
 const router = Router()
-const datasets = new Datasets()
 const cache: any = {}
+export const datasets = new Datasets()
 
 export function validateDataset(req: Request, res: Response) {
   if (isUndefined(datasets.get(req.params.dataset))) {
@@ -87,7 +87,7 @@ interface InterfaceRequest extends Request {
  */
 router.route('/datasets')
   .all((req: Request, res: Response) => {
-    res.json(keys(datasets))
+    res.json(keys(datasets.datasets))
   })
 
 // ********************

@@ -46,15 +46,15 @@ const loadConfigs = () => {
 //////////////////////////////////////
 
 export class Datasets {
-  private _datasets: any
+  public datasets: any
 
   constructor() {
-    this._datasets = {}
+    this.datasets = {}
     this.load()
   }
 
   public get(name: string): MBTiles {
-    return this._datasets[name]
+    return this.datasets[name]
   }
 
   private load() {
@@ -63,7 +63,7 @@ export class Datasets {
       if (ext === 'mbtiles') {
         debug.server(`[OK] Data loaded: ${ name }`)
         const mbtiles = new MBTiles(path.join(__dirname, '..', 'data', data))
-        this._datasets[name] = mbtiles
+        this.datasets[name] = mbtiles
       }
     })
   }

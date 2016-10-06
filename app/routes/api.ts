@@ -13,7 +13,7 @@ router.route('/')
     res.json({
       api: 'Micro Data Service v0.1.0',
       cluster: (worker) ? worker.process.pid : undefined,
-      datasets: keys(datasets),
+      datasets: keys(datasets.datasets),
       http: {
         GET: [
           '/datasets',
