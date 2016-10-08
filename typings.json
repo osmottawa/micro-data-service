@@ -2,6 +2,7 @@
   "globalDependencies": {
     "bluebird": "registry:dt/bluebird#3.0.0+20160928162057",
     "body-parser": "registry:dt/body-parser#0.0.0+20160619023215",
+    "cheap-ruler": "registry:dt/cheap-ruler#2.4.1+20160929115754",
     "concaveman": "registry:dt/concaveman#1.1.0+20160919061707",
     "debug": "registry:dt/debug#0.0.0+20160317120654",
     "express": "registry:dt/express#4.0.0+20160708185218",

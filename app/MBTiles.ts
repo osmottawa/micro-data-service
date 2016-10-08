@@ -1,6 +1,7 @@
 import * as Sequelize from 'sequelize'
 import { range } from 'global-mercator'
 import { keys } from 'lodash'
+import * as cheapRuler from 'cheap-ruler'
 import * as zlib from 'zlib'
 import * as turf from '@turf/turf'
 import * as mercator from 'global-mercator'
@@ -36,14 +37,20 @@ function readTileData(data: InterfaceTilesInstance): Buffer {
   return data.tile_data
 }
 
-function parseGeoJSON(vt: any, tile: Tile) {
+function parseGeoJSON(vt: any, tile: Tile, area?: number) {
   const [x, y, z] = mercator.tileToGoogle(tile)
+  const ruler = cheapRuler.fromTile(y, z)
   const layerName = keys(vt.layers)[0]
   const layer = vt.layers[layerName]
   const collection = turf.featureCollection([])
   range(layer.length).map(i => {
     const geojson: GeoJSON.Feature<any> = layer.feature(i).toGeoJSON(x, y, z)
-    collection.features.push(geojson)
+    if (geojson.geometry.type === 'Polygon') {
+      if (area) {
+        const calc = ruler.area(geojson.geometry.coordinates)
+        if (area > calc) { collection.features.push(geojson) }
+      } else { collection.features.push(geojson) }
+    } else { collection.features.push(geojson) }
   })
   return collection
 }
@@ -71,7 +78,7 @@ export default class MBTiles {
   /**
    * Retrieve Buffer from Tile [x, y, z]
    */
-  public getTile(tile: Tile) {
+  public getTile(tile: Tile, area?: number) {
     const [x, y, z] = tile
     return this.tilesSQL.find({
       attributes: ['tile_data'],
@@ -84,6 +91,6 @@ export default class MBTiles {
       .then(readTileData)
       .then(gunzip)
       .then(parseVectorTile)
-      .then(vt => parseGeoJSON(vt, tile))
+      .then(vt => parseGeoJSON(vt, tile, area))
   }
 }
