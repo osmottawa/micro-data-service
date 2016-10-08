@@ -157,7 +157,8 @@ router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
   .get(async (req: InterfaceRequest, res: Response) => {
     validateDataset(req, res)
     const tile = getTile(req)
-    datasets.get(req.params.dataset).getTile(tile)
+    const area = Number(req.query.area)
+    datasets.get(req.params.dataset).getTile(tile, area)
       .then(results => {
         return parseResults(results, req, res)
       })

@@ -39,7 +39,7 @@ function readTileData(data: InterfaceTilesInstance): Buffer {
 
 function parseGeoJSON(vt: any, tile: Tile, area?: number) {
   const [x, y, z] = mercator.tileToGoogle(tile)
-  const ruler = cheapRuler.fromTile(y, z)
+  const ruler = cheapRuler.fromTile(y, z, 'feet')
   const layerName = keys(vt.layers)[0]
   const layer = vt.layers[layerName]
   const collection = turf.featureCollection([])
@@ -48,7 +48,7 @@ function parseGeoJSON(vt: any, tile: Tile, area?: number) {
     if (geojson.geometry.type === 'Polygon') {
       if (area) {
         const calc = ruler.area(geojson.geometry.coordinates)
-        if (area > calc) { collection.features.push(geojson) }
+        if (area < calc) { collection.features.push(geojson) }
       } else { collection.features.push(geojson) }
     } else { collection.features.push(geojson) }
   })
