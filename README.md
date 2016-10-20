@@ -21,7 +21,7 @@ Using [`tippecanoe`](https://github.com/mapbox/tippecanoe) you can generate Vect
 **Log into server**
 
 ```bash
-$ ssh root@addxy.com
+$ ssh root@data.osmcanada.ca
 ```
 
 You will be adding the Vector Tiles `.mbtiles` inside the `/data` folder.
@@ -55,7 +55,7 @@ $ docker-compose restart
 
 You should now see your new dataset in the JSON.
 
-[https://addxy.com/datasets](https://addxy.com/datasets)
+[https://data.osmcanada.ca/datasets](https://data.osmcanada.ca/datasets)
 
 ```json
 [
@@ -69,11 +69,11 @@ You should now see your new dataset in the JSON.
 
 **Tasking Manager URL**
 
-https://addxy.com/{z}/{x}/{y}/csd-schools.osm
+https://data.osmcanada.ca/{z}/{x}/{y}/csd-schools.osm
 
 **Import into JOSM URL**
 
-[http://localhost:8111/import?new_layer=true&url=https://addxy.com/{z}/{x}/{y}/csd-schools.osm](http://localhost:8111/import?new_layer=true&url=https://addxy.com/{z}/{x}/{y}/csd-schools.osm)
+[http://localhost:8111/import?new_layer=true&url=https://data.osmcanada.ca/{z}/{x}/{y}/csd-schools.osm](http://localhost:8111/import?new_layer=true&url=https://data.osmcanada.ca/{z}/{x}/{y}/csd-schools.osm)
 
 **Polygon GeoJSON (Advanced)**
 
@@ -139,7 +139,7 @@ $ sqlite3 ottawa-buildings-z13.mbtiles '.dump' > tmp &&
 Log in to the server.
 
 ```bash
-$ ssh root@addxy.com
+$ ssh root@data.osmcanada.ca
 $ cd mobile-map-builder/
 ```
 
