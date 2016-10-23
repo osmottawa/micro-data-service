@@ -37,14 +37,15 @@ $ wget https://raw.githubusercontent.com/osmottawa/imports/master/CSDraveurs/CSD
 
 ```bash
 $ tippecanoe \
-    --output=csd-schools.mbtiles \
+    --output=ottawa-address.mbtiles \
     --force \
     --base-zoom 12 \
     --no-feature-limit \
     --no-tile-size-limit \
     --minimum-zoom 12 \
     --maximum-zoom 18 \
-    CSD-schools.json
+    --buffer 0 \
+    ottawa-address.geojson
 ```
 
 Restart the server.
