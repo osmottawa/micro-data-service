@@ -39,10 +39,10 @@ $ wget https://raw.githubusercontent.com/osmottawa/imports/master/CSDraveurs/CSD
 $ tippecanoe \
     --output=ottawa-address.mbtiles \
     --force \
-    --base-zoom 12 \
+    --base-zoom 0 \
     --no-feature-limit \
     --no-tile-size-limit \
-    --minimum-zoom 12 \
+    --minimum-zoom 0 \
     --maximum-zoom 18 \
     --buffer 0 \
     ottawa-address.geojson
