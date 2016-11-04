@@ -79,8 +79,8 @@ https://data.osmcanada.ca/{z}/{x}/{y}/csd-schools.osm
 **Polygon GeoJSON (Advanced)**
 
 ```bash
-$ tippecanoe \
-    --output=ottawa-buildings-z13.mbtiles \
+tippecanoe \
+    --output=caledon-buildings-z13.mbtiles \
     --force \
     --minimum-zoom 13 \
     --maximum-zoom 13 \
@@ -91,12 +91,9 @@ $ tippecanoe \
     --no-polygon-splitting \
     --no-clipping \
     --no-duplication \
-    ottawa-buildings.geojson
-```
-
-```bash
-$ tippecanoe \
-    --output=ottawa-buildings-z14.mbtiles \
+    caledon-buildings.geojson
+tippecanoe \
+    --output=caledon-buildings-z14.mbtiles \
     --force \
     --minimum-zoom 14 \
     --maximum-zoom 14 \
@@ -107,12 +104,9 @@ $ tippecanoe \
     --no-polygon-splitting \
     --no-clipping \
     --no-duplication \
-    ottawa-buildings.geojson
-```
-
-```bash
-$ tippecanoe \
-    --output=ottawa-buildings-z15.mbtiles \
+    caledon-buildings.geojson
+tippecanoe \
+    --output=caledon-buildings-z15.mbtiles \
     --force \
     --minimum-zoom 15 \
     --maximum-zoom 15 \
@@ -123,16 +117,17 @@ $ tippecanoe \
     --no-polygon-splitting \
     --no-clipping \
     --no-duplication \
-    ottawa-buildings.geojson
+    caledon-buildings.geojson
 ```
 
 Merge SQLite together
 
 ```bash
-$ sqlite3 ottawa-buildings-z13.mbtiles '.dump' > tmp &&
-    sqlite3 ottawa-buildings-z14.mbtiles '.dump' >> tmp &&
-    sqlite3 ottawa-buildings-z15.mbtiles '.dump' >> tmp &&
-    sqlite3 ottawa-buildings.mbtiles < 'tmp'
+sqlite3 caledon-buildings-z13.mbtiles '.dump' > tmp &&
+    sqlite3 caledon-buildings-z14.mbtiles '.dump' >> tmp &&
+    sqlite3 caledon-buildings-z15.mbtiles '.dump' >> tmp &&
+    sqlite3 caledon-buildings.mbtiles < 'tmp'
+rm caledon-buildings-z13.mbtiles caledon-buildings-z14.mbtiles caledon-buildings-z15.mbtiles tmp
 ```
 
 ## Configure Server
