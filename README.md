@@ -36,8 +36,11 @@ $ wget https://raw.githubusercontent.com/osmottawa/imports/master/CSDraveurs/CSD
 **Convert GeoJSON Point to Vector Tile**
 
 ```bash
-$ tippecanoe \
-    --output=ottawa-address.mbtiles \
+SOURCE=ottawa-address
+
+# Zoom 0 to 18
+tippecanoe \
+    --output=$SOURCE.mbtiles \
     --force \
     --base-zoom 0 \
     --no-feature-limit \
@@ -45,7 +48,7 @@ $ tippecanoe \
     --minimum-zoom 0 \
     --maximum-zoom 18 \
     --buffer 0 \
-    ottawa-address.geojson
+    $SOURCE.geojson
 ```
 
 Restart the server.
@@ -79,7 +82,7 @@ https://data.osmcanada.ca/{z}/{x}/{y}/csd-schools.osm
 **Polygon GeoJSON (Advanced)**
 
 ```bash
-SOURCE=caledon-buildings
+SOURCE=ottawa-buildings
 
 # Zoom 13
 tippecanoe \
