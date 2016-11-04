@@ -79,46 +79,6 @@ https://data.osmcanada.ca/{z}/{x}/{y}/csd-schools.osm
 **Polygon GeoJSON (Advanced)**
 
 ```bash
-tippecanoe \
-    --output=caledon-buildings-z13.mbtiles \
-    --force \
-    --minimum-zoom 13 \
-    --maximum-zoom 13 \
-    --full-detail 19 \
-    --no-line-simplification \
-    --no-feature-limit \
-    --no-tile-size-limit \
-    --no-polygon-splitting \
-    --no-clipping \
-    --no-duplication \
-    caledon-buildings.geojson
-tippecanoe \
-    --output=caledon-buildings-z14.mbtiles \
-    --force \
-    --minimum-zoom 14 \
-    --maximum-zoom 14 \
-    --full-detail 18 \
-    --no-line-simplification \
-    --no-feature-limit \
-SOURCE=caledon-buildings
-tippecanoe \
-    --output=$SOURCE-z13.mbtiles \
-    --force \
-    --minimum-zoom 13 \
-    --maximum-zoom 13 \
-    --full-detail 19 \
-    --no-line-simplification \
-    --no-feature-limit \
-    --no-tile-size-limit \
-    --no-polygon-splitting \
-    --no-clipping \
-    --no-duplication \
-    $SOURCE.geojson
-tippecanoe \
-    --output=$SOURCE-z14.mbtiles \
-    --force \
-    --minimum-zoom 14 \
-    --maximum-zoom 14 \
 SOURCE=caledon-buildings
 
 # Zoom 13
