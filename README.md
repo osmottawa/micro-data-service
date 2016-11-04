@@ -100,13 +100,60 @@ tippecanoe \
     --full-detail 18 \
     --no-line-simplification \
     --no-feature-limit \
+SOURCE=caledon-buildings
+tippecanoe \
+    --output=$SOURCE-z13.mbtiles \
+    --force \
+    --minimum-zoom 13 \
+    --maximum-zoom 13 \
+    --full-detail 19 \
+    --no-line-simplification \
+    --no-feature-limit \
     --no-tile-size-limit \
     --no-polygon-splitting \
     --no-clipping \
     --no-duplication \
-    caledon-buildings.geojson
+    $SOURCE.geojson
 tippecanoe \
-    --output=caledon-buildings-z15.mbtiles \
+    --output=$SOURCE-z14.mbtiles \
+    --force \
+    --minimum-zoom 14 \
+    --maximum-zoom 14 \
+SOURCE=caledon-buildings
+
+# Zoom 13
+tippecanoe \
+    --output=$SOURCE-z13.mbtiles \
+    --force \
+    --minimum-zoom 13 \
+    --maximum-zoom 13 \
+    --full-detail 19 \
+    --no-line-simplification \
+    --no-feature-limit \
+    --no-tile-size-limit \
+    --no-polygon-splitting \
+    --no-clipping \
+    --no-duplication \
+    $SOURCE.geojson
+
+# Zoom 14
+tippecanoe \
+    --output=$SOURCE-z14.mbtiles \
+    --force \
+    --minimum-zoom 14 \
+    --maximum-zoom 14 \
+    --full-detail 18 \
+    --no-line-simplification \
+    --no-feature-limit \
+    --no-tile-size-limit \
+    --no-polygon-splitting \
+    --no-clipping \
+    --no-duplication \
+    $SOURCE.geojson
+
+# Zoom 15
+tippecanoe \
+    --output=$SOURCE-z15.mbtiles \
     --force \
     --minimum-zoom 15 \
     --maximum-zoom 15 \
@@ -117,17 +164,14 @@ tippecanoe \
     --no-polygon-splitting \
     --no-clipping \
     --no-duplication \
-    caledon-buildings.geojson
-```
+    $SOURCE.geojson
 
-Merge SQLite together
-
-```bash
-sqlite3 caledon-buildings-z13.mbtiles '.dump' > tmp &&
-    sqlite3 caledon-buildings-z14.mbtiles '.dump' >> tmp &&
-    sqlite3 caledon-buildings-z15.mbtiles '.dump' >> tmp &&
-    sqlite3 caledon-buildings.mbtiles < 'tmp'
-rm caledon-buildings-z13.mbtiles caledon-buildings-z14.mbtiles caledon-buildings-z15.mbtiles tmp
+# Merge SQLite together
+sqlite3 $SOURCE-z13.mbtiles '.dump' > tmp &&
+    sqlite3 $SOURCE-z14.mbtiles '.dump' >> tmp &&
+    sqlite3 $SOURCE-z15.mbtiles '.dump' >> tmp &&
+    sqlite3 $SOURCE.mbtiles < 'tmp'
+rm $SOURCE-z13.mbtiles $SOURCE-z14.mbtiles $SOURCE-z15.mbtiles tmp
 ```
 
 ## Configure Server
