@@ -3,19 +3,19 @@ import { range } from 'global-mercator'
 import { keys } from 'lodash'
 import * as cheapRuler from 'cheap-ruler'
 import * as zlib from 'zlib'
-import * as turf from '@turf/turf'
+import { featureCollection } from '@turf/helpers'
 import * as mercator from 'global-mercator'
 import Tiles, {
-  InterfaceTilesAttribute,
-  InterfaceTilesInstance,
-  InterfaceTilesModel } from './models/Tiles'
+  TilesAttribute,
+  TilesInstance,
+  TilesModel } from './models/Tiles'
 const Pbf = require('pbf')
 const VectorTile = require('vector-tile').VectorTile
 
 /**
  * Tile [x, y, z]
  */
-export type Tile = [number, number, number]
+export type Tile = [number, number, number] | number[]
 
 function gunzip(data: Buffer): Promise<Buffer> {
   return new Promise((resolve, reject) => {
@@ -32,7 +32,7 @@ function parseVectorTile(data: Buffer): Promise<any> {
   })
 }
 
-function readTileData(data: InterfaceTilesInstance): Buffer {
+function readTileData(data: TilesInstance): Buffer {
   if (!data) { throw new Error('Tile has no data') }
   return data.tile_data
 }
@@ -42,7 +42,7 @@ function parseGeoJSON(vt: any, tile: Tile, area?: number) {
   const ruler = cheapRuler.fromTile(y, z, 'feet')
   const layerName = keys(vt.layers)[0]
   const layer = vt.layers[layerName]
-  const collection = turf.featureCollection([])
+  const collection = featureCollection([])
   range(layer.length).map(i => {
     const geojson: GeoJSON.Feature<any> = layer.feature(i).toGeoJSON(x, y, z)
     if (geojson.geometry.type === 'Polygon') {
@@ -68,12 +68,12 @@ export function connect(uri: string) {
 export default class MBTiles {
   public uri: string
   private sequelize: Sequelize.Sequelize
-  private tilesSQL: InterfaceTilesModel
+  private tilesSQL: TilesModel
 
   constructor(uri: string) {
     this.uri = uri
     this.sequelize = connect(uri)
-    this.tilesSQL = this.sequelize.define<InterfaceTilesInstance, InterfaceTilesAttribute>('tiles', Tiles)
+    this.tilesSQL = this.sequelize.define<TilesInstance, TilesAttribute>('tiles', Tiles)
   }
   /**
    * Retrieve Buffer from Tile [x, y, z]

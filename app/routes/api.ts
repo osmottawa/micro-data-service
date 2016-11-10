@@ -1,7 +1,6 @@
-import { keys } from 'lodash'
 import { Router, Request, Response } from 'express'
-import { worker } from 'cluster'
-import { datasets } from './datasets'
+import { getFiles } from '../utils'
+import { PATH } from '../configs'
 
 const router = Router()
 
@@ -11,9 +10,8 @@ const router = Router()
 router.route('/')
   .all((req: Request, res: Response) => {
     res.json({
-      api: 'Micro Data Service v0.1.0',
-      cluster: (worker) ? worker.process.pid : undefined,
-      datasets: keys(datasets.datasets),
+      api: 'Micro Data Service v0.2.0',
+      datasets: getFiles(PATH),
       http: {
         GET: [
           '/datasets',

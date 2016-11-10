@@ -13,8 +13,6 @@
         "node_modules"
     ],
     "filesGlob": [
-        "./**/*.ts",
-        "configs/**/*",
-        "./typings/index.d.ts"
+        "**/*.ts"
     ]
 }

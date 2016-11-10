@@ -1,9 +1,8 @@
 import * as express from 'express'
-import * as multer from 'multer'
+import { Request, Response, NextFunction } from 'express'
 import * as bodyParser from 'body-parser'
-import debug from './debug'
-import routes from './routes'
-import { PORT } from './configs'
+import routes from './app/routes'
+import { PORT } from './app/configs'
 
 const app = express()
 app.use(bodyParser.json())
@@ -11,28 +10,26 @@ app.set('json spaces', 2)
 app.use(bodyParser.urlencoded({ extended: true }))
 app.set('trust proxy', true)
 
-// Logging Middleware
-const upload: any = multer({ dest: 'uploads/' })
-app.use(upload.array(), (request: any, response: any, next: any) => {
+function logging(request: Request, response: Response, next: NextFunction) {
   const log = {
-    auth: request.headers.authorization,
     body: request.body,
     ip: request.headers['x-forwarded-for'] || request.connection.remoteAddress,
     method: request.method,
     url: request.originalUrl,
   }
-  debug.server(log)
+  console.log(log)
   next()
-})
+}
 
-// CORS Middleware
-app.use((request: any, response: any, next: any) => {
+function accessControl(request: Request, response: Response, next: NextFunction) {
   response.header('Access-Control-Allow-Origin', '*')
   response.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,Cache-Control,Accept,Accept-Encoding')
   next()
-})
+}
 
-// Register Routes
+// Routes
+app.use(logging)
+app.use(accessControl)
 app.use('/', routes.api)
 app.use('/', routes.datasets)
 

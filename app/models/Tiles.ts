@@ -4,31 +4,31 @@ import { BLOB, INTEGER, DefineAttributes } from 'sequelize'
 /**
  * Tiles Interface for MBTiles SQL Model
  */
-export interface InterfaceTilesAttribute {
-  zoom_level: number,
+export interface TilesAttribute {
   tile_column: number,
   tile_row: number,
   tile_data?: Buffer,
+  zoom_level: number,
 }
 
 /**
  * Tiles Instance for MBTiles SQL Model
  */
-export interface InterfaceTilesInstance extends Sequelize.Instance<InterfaceTilesAttribute>, InterfaceTilesAttribute { }
+export interface TilesInstance extends Sequelize.Instance<TilesAttribute>, TilesAttribute { }
 
 /**
  * Tiles Model for MBTiles SQL Model
  */
-export interface InterfaceTilesModel extends Sequelize.Model<InterfaceTilesInstance, InterfaceTilesAttribute> { }
+export interface TilesModel extends Sequelize.Model<TilesInstance, TilesAttribute> { }
 
 /**
  * Tiles Scheme for MBTiles SQL Model
  */
 const scheme: DefineAttributes = {
-  zoom_level: { type: INTEGER },
   tile_column: { type: INTEGER },
-  tile_row: { type: INTEGER },
   tile_data: { type: BLOB },
+  tile_row: { type: INTEGER },
+  zoom_level: { type: INTEGER },
 }
 
 export default scheme
