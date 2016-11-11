@@ -7,6 +7,7 @@
     "test": "npm run build && npm run ava && npm run lint",
     "docker-test": "docker build -t mds . && docker run --rm -it mds npm run test",
     "ava": "nyc ava",
+    "build": "tsc",
     "start": "node index.js",
     "lint": "tslint app/**.ts tests/**.ts"
   },

@@ -9,14 +9,10 @@ WORKDIR /app
 COPY package.json /app/
 RUN npm install
 
-# Install typings
-COPY typings.json /app/
-RUN npm run typings
-
 # Bundle app source
 COPY . /app
 
 # Start App
 EXPOSE 5000
-ENV DEBUG mds:*
+
 CMD ["npm", "start"]
