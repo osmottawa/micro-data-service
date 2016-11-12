@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express'
 import { getFiles } from '../utils'
 import { PATH } from '../configs'
+import * as path from 'path'
 
 const router = Router()
 
@@ -10,7 +11,7 @@ const router = Router()
 router.route('/')
   .all((req: Request, res: Response) => {
     res.json({
-      api: 'Micro Data Service v0.2.0',
+      api: `Micro Data Service v${ require(path.join('..', '..', 'package.json')).version}`,
       datasets: getFiles(PATH),
       http: {
         GET: [

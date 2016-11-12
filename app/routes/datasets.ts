@@ -3,6 +3,7 @@ import * as bboxPolygon from '@turf/bbox-polygon'
 import * as path from 'path'
 import * as cheapRuler from 'cheap-ruler'
 import * as mercator from 'global-mercator'
+import * as geocoder from 'geocoder-geojson'
 import { Router, Request, Response } from 'express'
 import { geojson2osm } from 'geojson2osm-es6'
 import { Tile, getFiles } from '../utils'
@@ -24,7 +25,7 @@ interface DatasetRequest extends Request {
   query: {
     area: string
     filter: string
-    wikimedia: string
+    wikidata: string
   }
 }
 
@@ -75,7 +76,7 @@ export function parseResults(results: GeoJSON.FeatureCollection<any>, req: Datas
 }
 
 export function parseOSM(results: GeoJSON.FeatureCollection<any>) {
-  return geojson2osm(results).replace(/changeset="false"/g, 'action=\"modifiy\"')
+  return geojson2osm(results) // .replace(/changeset="false"/g, 'action=\"modify\"')
 }
 
 
@@ -110,6 +111,23 @@ function filterByFilter(results: FeatureCollection, tagFilter: Array<Array<strin
   return results
 }
 
+async function addWikidata(results: FeatureCollection): Promise<FeatureCollection> {
+  let container: Array<GeoJSON.Feature<GeoJSON.Point>> = []
+  for (const result of results.features) {
+    if (!result.properties.wikidata) {
+      const wikidata = await geocoder.wikidata(result.properties.name, { nearest: result.geometry.coordinates })
+      if (wikidata.features[0]) {
+        console.log(wikidata.features[0])
+        result.properties.wikidata = wikidata.features[0].id
+        result.properties['@action'] = 'modify'
+        delete result.properties['@changeset']
+      }
+    }
+    container.push(result)
+  }
+  return turf.featureCollection(container)
+}
+
 /**
  * Retrieves Geographical Extent of Tile
  */
@@ -131,18 +149,15 @@ router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
     const tile = getTile(req)
     const area = (req.query.area) ? Number(req.query.area) : undefined
     const filter = (req.query.filter) ? JSON.parse(req.query.filter) : undefined
-    const wikimedia = (req.query.wikimedia) ? JSON.parse(req.query.wikimedia) : undefined
-
-    console.log(filter)
-    console.log(wikimedia)
-    console.log(area)
+    const wikidata = (req.query.wikidata) ? (req.query.wikidata.toLocaleLowerCase() === 'true') : undefined
 
     // Fetch tile from local MBTiles
     const mbtiles = new MBTiles(path.join(PATH, `${ req.params.dataset }.mbtiles`))
     mbtiles.getTile(tile)
-      .then(results => {
+      .then(async results => {
         if (filter) { results = filterByFilter(results, filter)}
         if (area) { results = filterByArea(results, tile, area) }
+        if (wikidata) { results = await addWikidata(results)}
         return parseResults(results, req, res)
       }, error => {
         return parseResults(turf.featureCollection([]), req, res)

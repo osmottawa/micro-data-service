@@ -1,5 +1,11 @@
 ## 0.3.0 - 2016-11-12
 
+- Add Wikidata automatic tagging
+
+```
+?wikidata=true
+```
+
 - Add `filter` option, uses the same syntax as [`osm-tag-stats`](https://github.com/mapbox/osm-tag-stats)
 
 ```
