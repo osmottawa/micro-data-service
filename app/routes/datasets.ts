@@ -1,6 +1,7 @@
-import { featureCollection } from '@turf/helpers'
+import * as turf from '@turf/helpers'
 import * as bboxPolygon from '@turf/bbox-polygon'
 import * as path from 'path'
+import * as cheapRuler from 'cheap-ruler'
 import * as mercator from 'global-mercator'
 import { Router, Request, Response } from 'express'
 import { geojson2osm } from 'geojson2osm-es6'
@@ -10,6 +11,7 @@ import { PATH } from '../configs'
 
 const router = Router()
 const cache: any = { }
+type FeatureCollection = GeoJSON.FeatureCollection<any>
 
 interface DatasetRequest extends Request {
   params: {
@@ -18,6 +20,11 @@ interface DatasetRequest extends Request {
     y: string
     z: string
     dataset: string
+  }
+  query: {
+    area: string
+    filter: string
+    wikimedia: string
   }
 }
 
@@ -71,6 +78,38 @@ export function parseOSM(results: GeoJSON.FeatureCollection<any>) {
   return geojson2osm(results).replace(/changeset="false"/g, 'action=\"modifiy\"')
 }
 
+
+/**
+ * Filter By Area
+ */
+function filterByArea(results: FeatureCollection, tile: Tile, area: number): FeatureCollection {
+    const y = tile[1]
+    const z = tile[2]
+    const ruler = cheapRuler.fromTile(y, z, 'feet')
+    if (area) {
+      results.features = results.features.filter(result => area < ruler.area(result.geometry.coordinates))
+    }
+    return results
+}
+
+function filterByFilter(results: FeatureCollection, tagFilter: Array<Array<string>>): FeatureCollection {
+  if (tagFilter) {
+    results.features = results.features.filter(result => {
+      let status = true
+      tagFilter.map(tag => {
+        const [operator, key, value] = tag
+        if (operator === '==') {
+          if (result.properties[key] !== value) {
+            status = false
+          }
+        }
+      })
+      return status
+    })
+  }
+  return results
+}
+
 /**
  * Retrieves Geographical Extent of Tile
  */
@@ -78,7 +117,7 @@ router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)(/extent:ext(.json|.geojson|.osm|)|:ext
   .get((req: DatasetRequest, res: Response) => {
     parseUrl(req)
     const extent = getPolygon(req)
-    const results = featureCollection([extent])
+    const results = turf.featureCollection([extent])
 
     return parseResults(results, req, res)
   })
@@ -90,15 +129,23 @@ router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
   .get(async (req: DatasetRequest, res: Response) => {
     validateDataset(req, res)
     const tile = getTile(req)
-    const area = Number(req.query.area)
+    const area = (req.query.area) ? Number(req.query.area) : undefined
+    const filter = (req.query.filter) ? JSON.parse(req.query.filter) : undefined
+    const wikimedia = (req.query.wikimedia) ? JSON.parse(req.query.wikimedia) : undefined
+
+    console.log(filter)
+    console.log(wikimedia)
+    console.log(area)
 
     // Fetch tile from local MBTiles
     const mbtiles = new MBTiles(path.join(PATH, `${ req.params.dataset }.mbtiles`))
-    mbtiles.getTile(tile, area)
-      .then(data => {
-        return parseResults(data, req, res)
+    mbtiles.getTile(tile)
+      .then(results => {
+        if (filter) { results = filterByFilter(results, filter)}
+        if (area) { results = filterByArea(results, tile, area) }
+        return parseResults(results, req, res)
       }, error => {
-        return parseResults(featureCollection([]), req, res)
+        return parseResults(turf.featureCollection([]), req, res)
       })
   })
 
