@@ -1,12 +1,14 @@
 import * as turf from '@turf/helpers'
 import * as bboxPolygon from '@turf/bbox-polygon'
+import * as nearestTurf from '@turf/nearest'
+import * as distanceTurf from '@turf/distance'
 import * as path from 'path'
 import * as cheapRuler from 'cheap-ruler'
 import * as mercator from 'global-mercator'
 import * as geocoder from 'geocoder-geojson'
 import { Router, Request, Response } from 'express'
 import { geojson2osm } from 'geojson2osm-es6'
-import { Tile, getFiles } from '../utils'
+import { Tile, getFiles, LngLat } from '../utils'
 import MBTiles from '../mbtiles'
 import { PATH } from '../configs'
 
@@ -79,7 +81,6 @@ export function parseOSM(results: GeoJSON.FeatureCollection<any>) {
   return geojson2osm(results) // .replace(/changeset="false"/g, 'action=\"modify\"')
 }
 
-
 /**
  * Filter By Area
  */
@@ -115,12 +116,16 @@ async function addWikidata(results: FeatureCollection): Promise<FeatureCollectio
   let container: Array<GeoJSON.Feature<GeoJSON.Point>> = []
   for (const result of results.features) {
     if (!result.properties.wikidata) {
-      const wikidata = await geocoder.wikidata(result.properties.name, { nearest: result.geometry.coordinates })
-      if (wikidata.features[0]) {
-        console.log(wikidata.features[0])
-        result.properties.wikidata = wikidata.features[0].id
-        result.properties['@action'] = 'modify'
-        delete result.properties['@changeset']
+      const name = result.properties.name
+      if (name) {
+        const wikidataOptions = {nearest: result.geometry.coordinates, in: ['town', 'city'], distance: 10}
+        const wikidata = await geocoder.wikidata(name, wikidataOptions)
+        if (wikidata.features[0]) {
+          console.log(wikidata.features[0])
+          result.properties.wikidata = wikidata.features[0].id
+          result.properties['@action'] = 'modify'
+          delete result.properties['@changeset']
+        }
       }
     }
     container.push(result)
