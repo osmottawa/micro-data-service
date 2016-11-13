@@ -1,5 +1,6 @@
-## 0.3.0 - 2016-11-12
+## 0.3.1 - 2016-11-13
 
+- Fix Wikidata crashing issue
 - Add Wikidata automatic tagging
 
 ```

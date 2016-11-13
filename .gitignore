@@ -11,6 +11,7 @@ pids
 typings
 
 *.mbtiles
+*.mbtiles.gz
 *.js
 *.js.map
 *.json

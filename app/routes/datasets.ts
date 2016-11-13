@@ -28,6 +28,7 @@ interface DatasetRequest extends Request {
     area: string
     filter: string
     wikidata: string
+    distance: string
   }
 }
 
@@ -63,15 +64,7 @@ export function parseUrl(req: DatasetRequest): string {
 export function parseResults(results: GeoJSON.FeatureCollection<any>, req: DatasetRequest, res: Response) {
   if (req.params.ext === '.osm') {
     res.set('Content-Type', 'text/xml')
-    let osm: string
-    if (cache[req.url]) {
-      console.log('using cache')
-      osm = cache[req.url]
-    } else {
-      osm = parseOSM(results)
-      cache[req.url] = osm
-    }
-    return res.send(osm)
+    return res.send(parseOSM(results))
   } else {
     return res.json(results)
   }
@@ -112,22 +105,24 @@ function filterByFilter(results: FeatureCollection, tagFilter: Array<Array<strin
   return results
 }
 
-async function addWikidata(results: FeatureCollection): Promise<FeatureCollection> {
-  let container: Array<GeoJSON.Feature<GeoJSON.Point>> = []
+async function addWikidata(results: FeatureCollection, req: DatasetRequest): Promise<FeatureCollection> {
+  const container: Array<GeoJSON.Feature<GeoJSON.Point>> = []
+  const distance = (req.query.distance) ? Number(req.query.distance) : 10
   for (const result of results.features) {
     if (!result.properties.wikidata) {
+      console.log(`Fetching Wikidata [${ distance }km]: ${ result.properties.name }`)
       const name = result.properties.name
       if (name) {
-        const wikidataOptions = {nearest: result.geometry.coordinates, in: ['town', 'city'], distance: 10}
+        const wikidataOptions = {nearest: result.geometry.coordinates, places: ['municipality', 'suburb', 'town', 'city', 'capital'], distance}
         const wikidata = await geocoder.wikidata(name, wikidataOptions)
         if (wikidata.features[0]) {
-          console.log(wikidata.features[0])
+          console.log(`[Success] Wikidata found! [${ wikidata.features[0].id }]: ${ result.properties.name }`)
           result.properties.wikidata = wikidata.features[0].id
           result.properties['@action'] = 'modify'
           delete result.properties['@changeset']
-        }
+        } else { console.log(`[Error] Wikidata not found: ${ result.properties.name }`)}
       }
-    }
+    } else { console.log(`Wikidata already exists! [${ result.properties.wikidata }]: ${ result.properties.name }`)}
     container.push(result)
   }
   return turf.featureCollection(container)
@@ -156,16 +151,24 @@ router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
     const filter = (req.query.filter) ? JSON.parse(req.query.filter) : undefined
     const wikidata = (req.query.wikidata) ? (req.query.wikidata.toLocaleLowerCase() === 'true') : undefined
 
+    if (cache[req.url]) {
+      console.log('using cache')
+      return parseResults(cache[req.url], req, res)
+    }
+
     // Fetch tile from local MBTiles
     const mbtiles = new MBTiles(path.join(PATH, `${ req.params.dataset }.mbtiles`))
     mbtiles.getTile(tile)
       .then(async results => {
         if (filter) { results = filterByFilter(results, filter)}
         if (area) { results = filterByArea(results, tile, area) }
-        if (wikidata) { results = await addWikidata(results)}
+        if (wikidata) { results = await addWikidata(results, req)}
+        cache[req.url] = results
         return parseResults(results, req, res)
       }, error => {
-        return parseResults(turf.featureCollection([]), req, res)
+        const results = turf.featureCollection([])
+        cache[req.url] = results
+        return parseResults(results, req, res)
       })
   })
 
