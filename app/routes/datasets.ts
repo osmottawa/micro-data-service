@@ -108,12 +108,14 @@ function filterByFilter(results: FeatureCollection, tagFilter: Array<Array<strin
 async function addWikidata(results: FeatureCollection, req: DatasetRequest): Promise<FeatureCollection> {
   const container: Array<GeoJSON.Feature<GeoJSON.Point>> = []
   const distance = (req.query.distance) ? Number(req.query.distance) : 10
+  const validPlaces = ['neighborhood', 'municipality', 'suburb', 'town', 'city', 'capital']
+
   for (const result of results.features) {
     if (!result.properties.wikidata) {
       console.log(`Fetching Wikidata [${ distance }km]: ${ result.properties.name }`)
       const name = result.properties.name
       if (name) {
-        const wikidataOptions = {nearest: result.geometry.coordinates, places: ['municipality', 'suburb', 'town', 'city', 'capital'], distance}
+        const wikidataOptions = {nearest: result.geometry.coordinates, places: validPlaces, distance}
         const wikidata = await geocoder.wikidata(name, wikidataOptions)
         if (wikidata.features[0]) {
           console.log(`[Success] Wikidata found! [${ wikidata.features[0].id }]: ${ result.properties.name }`)

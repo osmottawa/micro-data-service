@@ -1,6 +1,6 @@
 {
   "name": "micro-data-service",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Hosts vector tiles to be used in conjuction with the OSM Tasking Manager.",
   "main": "index.js",
   "scripts": {
