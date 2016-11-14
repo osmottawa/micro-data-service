@@ -143,7 +143,7 @@ Log in to the server.
 
 ```bash
 $ ssh root@data.osmcanada.ca
-$ cd mobile-map-builder/
+$ cd micro-data-service/
 ```
 
 Restart Server using `docker-compose`
