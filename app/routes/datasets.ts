@@ -106,7 +106,7 @@ function filterByFilter(results: FeatureCollection, tagFilter: Array<Array<strin
 async function addWikidata(results: FeatureCollection, req: DatasetRequest): Promise<FeatureCollection> {
   const container: Array<GeoJSON.Feature<GeoJSON.Point>> = []
   const distance = (req.query.distance) ? Number(req.query.distance) : 10
-  const validPlaces = ['neighborhood', 'municipality', 'suburb', 'town', 'city', 'capital']
+  const validPlaces = ['capital', 'city', 'town', 'village', 'municipality', 'neighborhood', 'suburb']
 
   for (const result of results.features) {
     const name = result.properties['name:en'] || result.properties.name
