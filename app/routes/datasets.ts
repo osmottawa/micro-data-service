@@ -106,23 +106,35 @@ function filterByFilter(results: FeatureCollection, tagFilter: Array<Array<strin
 async function addWikidata(results: FeatureCollection, req: DatasetRequest): Promise<FeatureCollection> {
   const container: Array<GeoJSON.Feature<GeoJSON.Point>> = []
   const distance = (req.query.distance) ? Number(req.query.distance) : 10
-  const validPlaces = ['capital', 'city', 'town', 'village', 'municipality', 'neighborhood', 'suburb']
+  const places = ['capital', 'city', 'town', 'village', 'municipality', 'neighborhood', 'suburb']
 
   for (const result of results.features) {
     const name = result.properties['name:en'] || result.properties.name
+    const geometry = result.geometry.coordinates
+    const options = {nearest: geometry, places, distance}
+    console.log(`geojson-json (options): ${ name } ${ JSON.stringify(options) }`)
+
     if (result.properties.wikidata === undefined) {
       console.log(`Fetching Wikidata [${ distance }km]: ${ name }`)
+
       if (name !== undefined) {
-        const wikidataOptions = {nearest: result.geometry.coordinates, places: validPlaces, distance}
-        const wikidata = await geocoder.wikidata(name, wikidataOptions)
-        if (wikidata.features[0]) {
+        const wikidata = await geocoder.wikidata(name, options)
+        console.log(`wikidata results: ${ JSON.stringify(wikidata) }`)
+
+        if (wikidata.features.length > 0) {
           console.log(`[Success] Wikidata found! [${ wikidata.features[0].id }]: ${ name }`)
+
+          // Apply OSM related tags as a modified object
           result.properties.wikidata = wikidata.features[0].id
           result.properties['@action'] = 'modify'
           delete result.properties['@changeset']
-        } else { console.log(`[Error] Wikidata not found: ${ name }`)}
+        } else {
+          console.log(`[Error] Wikidata not found: ${ name }`)
+        }
       }
-    } else { console.log(`Wikidata already exists! [${ result.properties.wikidata }]: ${ name }`)}
+    } else {
+      console.log(`Wikidata already exists! [${ result.properties.wikidata }]: ${ name }`)
+    }
     container.push(result)
   }
   return turf.featureCollection(container)
