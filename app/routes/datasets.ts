@@ -114,7 +114,7 @@ async function addWikidata(results: FeatureCollection, req: DatasetRequest): Pro
     if (result.properties.wikidata === undefined) {
       const name = result.properties['name:en'] || result.properties.name
       console.log(`Fetching Wikidata [${ distance }km]: ${ name }`)
-      if (name) {
+      if (name !== undefined) {
         const wikidataOptions = {nearest: result.geometry.coordinates, places: validPlaces, distance}
         const wikidata = await geocoder.wikidata(name, wikidataOptions)
         if (wikidata.features[0]) {
