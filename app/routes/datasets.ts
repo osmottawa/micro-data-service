@@ -111,8 +111,8 @@ async function addWikidata(results: FeatureCollection, req: DatasetRequest): Pro
   const validPlaces = ['neighborhood', 'municipality', 'suburb', 'town', 'city', 'capital']
 
   for (const result of results.features) {
+    const name = result.properties['name:en'] || result.properties.name
     if (result.properties.wikidata === undefined) {
-      const name = result.properties['name:en'] || result.properties.name
       console.log(`Fetching Wikidata [${ distance }km]: ${ name }`)
       if (name !== undefined) {
         const wikidataOptions = {nearest: result.geometry.coordinates, places: validPlaces, distance}
