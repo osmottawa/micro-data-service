@@ -111,20 +111,20 @@ async function addWikidata(results: FeatureCollection, req: DatasetRequest): Pro
   const validPlaces = ['neighborhood', 'municipality', 'suburb', 'town', 'city', 'capital']
 
   for (const result of results.features) {
-    if (!result.properties.wikidata) {
-      console.log(`Fetching Wikidata [${ distance }km]: ${ result.properties.name }`)
-      const name = result.properties.name
+    if (result.properties.wikidata === undefined) {
+      const name = result.properties['name:en'] || result.properties.name
+      console.log(`Fetching Wikidata [${ distance }km]: ${ name }`)
       if (name) {
         const wikidataOptions = {nearest: result.geometry.coordinates, places: validPlaces, distance}
         const wikidata = await geocoder.wikidata(name, wikidataOptions)
         if (wikidata.features[0]) {
-          console.log(`[Success] Wikidata found! [${ wikidata.features[0].id }]: ${ result.properties.name }`)
+          console.log(`[Success] Wikidata found! [${ wikidata.features[0].id }]: ${ name }`)
           result.properties.wikidata = wikidata.features[0].id
           result.properties['@action'] = 'modify'
           delete result.properties['@changeset']
-        } else { console.log(`[Error] Wikidata not found: ${ result.properties.name }`)}
+        } else { console.log(`[Error] Wikidata not found: ${ name }`)}
       }
-    } else { console.log(`Wikidata already exists! [${ result.properties.wikidata }]: ${ result.properties.name }`)}
+    } else { console.log(`Wikidata already exists! [${ result.properties.wikidata }]: ${ name }`)}
     container.push(result)
   }
   return turf.featureCollection(container)
