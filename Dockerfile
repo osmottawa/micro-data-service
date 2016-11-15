@@ -12,9 +12,8 @@ RUN npm install --only=production
 RUN npm install --only=development
 
 # Bundle app source
-COPY tsconfig.json /src/tsconfig.json
-RUN npm run build
 COPY . /src/
+RUN npm run build
 
 # Start App
 EXPOSE 5000

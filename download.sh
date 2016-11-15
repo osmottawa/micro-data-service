@@ -97,3 +97,4 @@ rm -f $COUNTRY.mbtiles.gz
 
 # Upload to AWS
 aws s3 cp $TAG-$COUNTRY.mbtiles s3://data.osmcanada.ca/$TAG-$COUNTRY.mbtiles
+aws s3 cp $TAG-$COUNTRY.geojson s3://data.osmcanada.ca/$TAG-$COUNTRY.geojson
