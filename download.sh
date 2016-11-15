@@ -27,12 +27,12 @@ fi
 
 # Output Folder
 # ============
+cd /tmp
 if [ -n "$4" ]; then
     FOLDER=$4
 else
-    FOLDER=/tmp
+    FOLDER="/root/micro-data-service/data"
 fi
-cd $FOLDER
 
 # Download QA-Tile
 # ================
@@ -80,7 +80,7 @@ for ZOOM in $(seq 0 $MAX_ZOOM); do
 
     # SQL Dump
     # ========
-    sqlite3 $TAG-$COUNTRY-z$ZOOM.mbtiles '.dump' > $TAG-$COUNTRY.dump
+    sqlite3 $TAG-$COUNTRY-z$ZOOM.mbtiles '.dump' >> $TAG-$COUNTRY.dump
     rm $TAG-$COUNTRY-z$ZOOM.mbtiles
 done
 
@@ -96,5 +96,10 @@ rm -f $TAG-$COUNTRY.dump
 rm -f $COUNTRY.mbtiles.gz
 
 # Upload to AWS
+# =============
 aws s3 cp $TAG-$COUNTRY.mbtiles s3://data.osmcanada.ca/$TAG-$COUNTRY.mbtiles
 aws s3 cp $TAG-$COUNTRY.geojson s3://data.osmcanada.ca/$TAG-$COUNTRY.geojson
+
+# Copy to Folder
+# ==============
+cp /tmp/$TAG-$COUNTRY.mbtiles $FOLDER/$TAG-$COUNTRY.mbtiles
