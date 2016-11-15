@@ -1,13 +1,16 @@
-SOURCE=places-ca
+# united_states_of_america
+# canada
+COUNTRY=united_states_of_america
+SOURCE=places-$COUNTRY
 
 # Download
-wget https://s3.amazonaws.com/mapbox/osm-qa-tiles/latest.country/canada.mbtiles.gz
+wget https://s3.amazonaws.com/mapbox/osm-qa-tiles/latest.country/$COUNTRY.mbtiles.gz
 
 # Unzip
-gzip -d canada.mbtiles.gz
+gzip -d $COUNTRY.mbtiles.gz
 
 # Filter only @types=nodes place=*
-osm-tag-stats --geojson=$SOURCE.geojson --mbtiles='canada.mbtiles' --filter='./filter/places.json'
+osm-tag-stats --geojson=$SOURCE.geojson --mbtiles=$COUNTRY.mbtiles --filter='./filter/places.json'
 
 # Create Vector tile Zoom 0-18
 tippecanoe \
