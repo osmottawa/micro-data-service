@@ -22,7 +22,7 @@ fi
 if [ -n "$3" ]; then
     MAX_ZOOM="$3"
 else
-    MAX_ZOOM=16
+    MAX_ZOOM=18
 fi
 
 # Output Folder
@@ -86,9 +86,14 @@ done
 
 # Merge MBTiles
 # =============
+rm -f $TAG-$COUNTRY.mbtiles
 sqlite3 $TAG-$COUNTRY.mbtiles < $TAG-$COUNTRY.dump
 
 # Clean Files
 # ===========
 rm -f -r tmp-osm-tag-stats/
 rm -f $TAG-$COUNTRY.dump
+rm -f $COUNTRY.mbtiles.gz
+
+# Upload to AWS
+aws s3 cp $TAG-$COUNTRY.mbtiles s3://data.osmcanada.ca/$TAG-$COUNTRY.mbtiles
