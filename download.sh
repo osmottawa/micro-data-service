@@ -37,7 +37,13 @@ fi
 # Download QA-Tile
 # ================
 if [ ! -f $COUNTRY.mbtiles ]; then
-    wget https://s3.amazonaws.com/mapbox/osm-qa-tiles/latest.country/$COUNTRY.mbtiles.gz -O $COUNTRY.mbtiles.gz
+    BASE=https://s3.amazonaws.com/mapbox/osm-qa-tiles/latest
+    if [ "$COUNTRY" = "planet" ]; then
+        URL=$BASE.planet.mbtiles.gz
+    else
+        URL=$BASE.country/$COUNTRY.mbtiles.gz
+    fi
+    wget $URL -O $COUNTRY.mbtiles.gz
     gzip --force --decompress $COUNTRY.mbtiles.gz
 fi
 
