@@ -1,38 +1,43 @@
-#!/bin/sh
+#!/bin/bash
 
-# QA-Tiles
-# ========
-if [ -n "$1" ]; then
-    COUNTRY="$1"
-else
-    echo "[error] Must include country (same name as QA-Tiles)"
-    exit 1
-fi
-
-# OSM-Tag-Stats
-# =============
-if [ -n "$2" ]; then
-    TAG="$2"
-else
-    TAG="place"
-fi
-
-# Tippecanoe
-# ==========
-if [ -n "$3" ]; then
-    MAX_ZOOM="$3"
-else
-    MAX_ZOOM=18
-fi
-
-# Output Folder
-# ============
-cd /tmp
-if [ -n "$4" ]; then
-    FOLDER=$4
-else
-    FOLDER="/root/micro-data-service/data"
-fi
+while getopts ":c:t:z:f:h" opt; do
+	case $opt in
+		h)
+			echo "-c	Specify country" >&2
+			echo >&2
+			echo "-t	Specify the tag to filter. Default: place" >&2
+			echo >&2
+			echo "-z	Specify the maximum zoom for tippecanoe" >&2
+			echo >&2
+			echo "-f	Specify the output folder" >&2
+			echo >&2
+			echo "-h	Prints this help file" >&2
+			exit 0
+			;;
+		\?)
+			echo "Invalid option: -$OPTARG" >&2
+			exit 1
+			;;
+		:)
+			echo "Option -$OPTARG requires an argument." >&2
+			exit 1
+		c)
+			COUNTRY=$OPTARG
+			;;
+		t)
+			TAG=$OPTARG
+			;;
+		z)
+			MAX_ZOOM=$OPTARG
+			;;
+		f)
+			FOLDER=$OPTARG
+			;;		
+	esac
+done
+if [ -z ${FOLDER+x} ]; then	FOLDER="/root/micro-data-service/data"; fi
+if [ -z ${TAG+x} ]; then TAG="place"; fi
+if [ -z ${MAX_ZOOM+x} ]; then MAX_ZOOM=18; fi
 
 # Download QA-Tile
 # ================
