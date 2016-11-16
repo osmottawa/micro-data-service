@@ -26,7 +26,8 @@ interface DatasetRequest extends Request {
     area: string
     filter: string
     wikidata: string
-    distance: string
+    radius: string
+    subclasses: string
   }
 }
 
@@ -105,17 +106,16 @@ function filterByFilter(results: FeatureCollection, tagFilter: Array<Array<strin
 
 async function addWikidata(results: FeatureCollection, req: DatasetRequest): Promise<FeatureCollection> {
   const container: Array<GeoJSON.Feature<GeoJSON.Point>> = []
-  const distance = (req.query.distance) ? Number(req.query.distance) : 10
-  const places = ['capital', 'city', 'town', 'village', 'municipality', 'neighborhood', 'suburb']
-
+  const radius = (req.query.radius) ? Number(req.query.radius) : 15
+  const subclasses = (req.query.subclasses) ? JSON.parse(req.query.subclasses) : ['Q486972']
   for (const result of results.features) {
-    const name = result.properties['name:en'] || result.properties.name
+    const name = result.properties['name:en'] || result.properties['name:fr'] || result.properties['name:it'] || result.properties['name:de'] || result.properties.name
     const geometry = result.geometry.coordinates
-    const options = {nearest: geometry, places, distance}
+    const options = {nearest: geometry, subclasses, radius}
     console.log(`geojson-json (options): ${ name } ${ JSON.stringify(options) }`)
 
     if (result.properties.wikidata === undefined) {
-      console.log(`Fetching Wikidata [${ distance }km]: ${ name }`)
+      console.log(`Fetching Wikidata [${ radius }km]: ${ name }`)
 
       if (name !== undefined) {
         const wikidata = await geocoder.wikidata(name, options)
