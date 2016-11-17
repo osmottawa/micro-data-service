@@ -106,49 +106,51 @@ function filterByFilter(results: FeatureCollection, tagFilter: Array<Array<strin
 }
 
 function addWikidata(results: FeatureCollection, req: DatasetRequest): any {
-  const q = d3.queue(100)
-  const container: Array<GeoJSON.Feature<GeoJSON.Point>> = []
-  const radius = (req.query.radius) ? Number(req.query.radius) : 15
-  const subclasses = (req.query.subclasses) ? JSON.parse(req.query.subclasses) : ['Q486972']
+  return new Promise((resolve, reject) => {
+    const q = d3.queue(100)
+    const container: Array<GeoJSON.Feature<GeoJSON.Point>> = []
+    const radius = (req.query.radius) ? Number(req.query.radius) : 15
+    const subclasses = (req.query.subclasses) ? JSON.parse(req.query.subclasses) : ['Q486972']
 
-  // Function in d3-queue
-  async function requestWikidata(result: GeoJSON.Feature<any>, callback: any) {
-    const name = result.properties['name:en'] || result.properties['name:fr'] || result.properties.name
-    const geometry = result.geometry.coordinates
-    const options = {nearest: geometry, subclasses, radius}
-    console.log(`geojson-json (options): ${ name } ${ JSON.stringify(options) }`)
+    // Function in d3-queue
+    async function requestWikidata(result: GeoJSON.Feature<any>, callback: any) {
+      const name = result.properties['name:en'] || result.properties['name:fr'] || result.properties.name
+      const geometry = result.geometry.coordinates
+      const options = {nearest: geometry, subclasses, radius}
+      console.log(`geojson-json (options): ${ name } ${ JSON.stringify(options) }`)
 
-    if (result.properties.wikidata === undefined) {
-      console.log(`Fetching Wikidata [${ radius }km]: ${ name }`)
+      if (result.properties.wikidata === undefined) {
+        console.log(`Fetching Wikidata [${ radius }km]: ${ name }`)
 
-      if (name !== undefined) {
-        const wikidata = await geocoder.wikidata(name, options)
-        console.log(`wikidata results: ${ JSON.stringify(wikidata) }`)
+        if (name !== undefined) {
+          const wikidata = await geocoder.wikidata(name, options)
+          console.log(`wikidata results: ${ JSON.stringify(wikidata) }`)
 
-        if (wikidata.features.length > 0) {
-          console.log(`[Success] Wikidata found! [${ wikidata.features[0].id }]: ${ name }`)
+          if (wikidata.features.length > 0) {
+            console.log(`[Success] Wikidata found! [${ wikidata.features[0].id }]: ${ name }`)
 
-          // Apply OSM related tags as a modified object
-          result.properties.wikidata = wikidata.features[0].id
-          result.properties['@action'] = 'modify'
-          delete result.properties['@changeset']
-        } else {
-          console.log(`[Error] Wikidata not found: ${ name }`)
+            // Apply OSM related tags as a modified object
+            result.properties.wikidata = wikidata.features[0].id
+            result.properties['@action'] = 'modify'
+            delete result.properties['@changeset']
+          } else {
+            console.log(`[Error] Wikidata not found: ${ name }`)
+          }
         }
+      } else {
+        console.log(`Wikidata already exists! [${ result.properties.wikidata }]: ${ name }`)
       }
-    } else {
-      console.log(`Wikidata already exists! [${ result.properties.wikidata }]: ${ name }`)
+      // Finished
+      container.push(result)
+      callback(null)
     }
-    // Finished
-    container.push(result)
-    callback(null)
-  }
-  for (const result of results.features) {
-    q.defer(requestWikidata, result)
-  }
-  q.await((error) => {
-    if (error) { throw error }
-    return turf.featureCollection(container)
+    for (const result of results.features) {
+      q.defer(requestWikidata, result)
+    }
+    q.await((error) => {
+      if (error) { throw error }
+      return resolve(turf.featureCollection(container))
+    })
   })
 }
 
@@ -186,7 +188,7 @@ router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
       .then(async results => {
         if (filter) { results = filterByFilter(results, filter)}
         if (area) { results = filterByArea(results, tile, area) }
-        if (wikidata) { results = addWikidata(results, req)}
+        if (wikidata) { results = await addWikidata(results, req)}
         cache[req.url] = results
         return parseResults(results, req, res)
       }, error => {
