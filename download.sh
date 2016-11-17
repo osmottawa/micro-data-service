@@ -21,6 +21,7 @@ while getopts ":c:t:z:f:h" opt; do
 		:)
 			echo "Option -$OPTARG requires an argument." >&2
 			exit 1
+			;;
 		c)
 			COUNTRY=$OPTARG
 			;;
