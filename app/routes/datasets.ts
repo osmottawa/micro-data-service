@@ -105,7 +105,7 @@ function filterByFilter(results: FeatureCollection, tagFilter: Array<Array<strin
   return results
 }
 
-function removeProperties(results: FeatureCollection, properties = ['@name']): FeatureCollection {
+function removeProperties(results: FeatureCollection, properties = ['@user']): FeatureCollection {
   results.features = results.features.map(result => {
     properties.map(property => {
       delete result.properties[property]
@@ -199,7 +199,7 @@ router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
     const mbtiles = new MBTiles(path.join(PATH, `${ req.params.dataset }.mbtiles`))
     mbtiles.getTile(tile)
       .then(async results => {
-        results = removeProperties(results, ['@name'])
+        results = removeProperties(results, ['@user'])
         if (filter) { results = filterByFilter(results, filter)}
         if (area) { results = filterByArea(results, tile, area) }
         if (wikidata) { results = await addWikidata(results, req)}
