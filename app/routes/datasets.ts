@@ -105,7 +105,7 @@ function filterByFilter(results: FeatureCollection, tagFilter: Array<Array<strin
   return results
 }
 
-function addWikidata(results: FeatureCollection, req: DatasetRequest): any {
+function addWikidata(results: FeatureCollection, req: DatasetRequest): Promise<GeoJSON.FeatureCollection<any>> {
   return new Promise((resolve, reject) => {
     const q = d3.queue(100)
     const container: Array<GeoJSON.Feature<GeoJSON.Point>> = []
@@ -148,7 +148,10 @@ function addWikidata(results: FeatureCollection, req: DatasetRequest): any {
       q.defer(requestWikidata, result)
     }
     q.await((error) => {
-      if (error) { throw error }
+      if (error) {
+        console.log('[Error] Wikidata Queue', error)
+        return reject(turf.featureCollection(container))
+      }
       return resolve(turf.featureCollection(container))
     })
   })
