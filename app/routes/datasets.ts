@@ -4,6 +4,7 @@ import * as path from 'path'
 import * as cheapRuler from 'cheap-ruler'
 import * as mercator from 'global-mercator'
 import * as geocoder from 'geocoder-geojson'
+import * as d3 from 'd3-queue'
 import { Router, Request, Response } from 'express'
 import { geojson2osm } from 'geojson2osm-es6'
 import { Tile, getFiles } from '../utils'
@@ -104,12 +105,15 @@ function filterByFilter(results: FeatureCollection, tagFilter: Array<Array<strin
   return results
 }
 
-async function addWikidata(results: FeatureCollection, req: DatasetRequest): Promise<FeatureCollection> {
+function addWikidata(results: FeatureCollection, req: DatasetRequest): any {
+  const q = d3.queue(100)
   const container: Array<GeoJSON.Feature<GeoJSON.Point>> = []
   const radius = (req.query.radius) ? Number(req.query.radius) : 15
   const subclasses = (req.query.subclasses) ? JSON.parse(req.query.subclasses) : ['Q486972']
-  for (const result of results.features) {
-    const name = result.properties['name:en'] || result.properties['name:fr'] || result.properties['name:it'] || result.properties['name:de'] || result.properties.name
+
+  // Function in d3-queue
+  async function requestWikidata(result: GeoJSON.Feature<any>, callback: any) {
+    const name = result.properties['name:en'] || result.properties['name:fr'] || result.properties.name
     const geometry = result.geometry.coordinates
     const options = {nearest: geometry, subclasses, radius}
     console.log(`geojson-json (options): ${ name } ${ JSON.stringify(options) }`)
@@ -135,9 +139,17 @@ async function addWikidata(results: FeatureCollection, req: DatasetRequest): Pro
     } else {
       console.log(`Wikidata already exists! [${ result.properties.wikidata }]: ${ name }`)
     }
+    // Finished
     container.push(result)
+    callback(null)
   }
-  return turf.featureCollection(container)
+  for (const result of results.features) {
+    q.defer(requestWikidata, result)
+  }
+  q.await((error) => {
+    if (error) { throw error }
+    return turf.featureCollection(container)
+  })
 }
 
 /**
@@ -174,7 +186,7 @@ router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
       .then(async results => {
         if (filter) { results = filterByFilter(results, filter)}
         if (area) { results = filterByArea(results, tile, area) }
-        if (wikidata) { results = await addWikidata(results, req)}
+        if (wikidata) { results = addWikidata(results, req)}
         cache[req.url] = results
         return parseResults(results, req, res)
       }, error => {
