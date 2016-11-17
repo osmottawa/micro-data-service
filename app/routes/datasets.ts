@@ -105,6 +105,18 @@ function filterByFilter(results: FeatureCollection, tagFilter: Array<Array<strin
   return results
 }
 
+function removeProperties(results: FeatureCollection, properties = ['@name']): FeatureCollection {
+  results.features = results.features.map(result => {
+    properties.map(property => {
+      if (result.properties[property] !== undefined) {
+        delete result.properties[property]
+      }
+    })
+    return result
+  })
+  return results
+}
+
 function addWikidata(results: FeatureCollection, req: DatasetRequest): Promise<GeoJSON.FeatureCollection<any>> {
   return new Promise((resolve, reject) => {
     const q = d3.queue(100)
@@ -189,6 +201,7 @@ router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
     const mbtiles = new MBTiles(path.join(PATH, `${ req.params.dataset }.mbtiles`))
     mbtiles.getTile(tile)
       .then(async results => {
+        results = removeProperties(results, ['@name'])
         if (filter) { results = filterByFilter(results, filter)}
         if (area) { results = filterByArea(results, tile, area) }
         if (wikidata) { results = await addWikidata(results, req)}
