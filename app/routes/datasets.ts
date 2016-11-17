@@ -108,9 +108,7 @@ function filterByFilter(results: FeatureCollection, tagFilter: Array<Array<strin
 function removeProperties(results: FeatureCollection, properties = ['@name']): FeatureCollection {
   results.features = results.features.map(result => {
     properties.map(property => {
-      if (result.properties[property] !== undefined) {
-        delete result.properties[property]
-      }
+      delete result.properties[property]
     })
     return result
   })
