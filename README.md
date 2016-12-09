@@ -33,7 +33,7 @@ $ cd micro-data-service/data
 $ wget https://raw.githubusercontent.com/osmottawa/imports/master/CSDraveurs/CSD-schools.json
 ```
 
-**Convert GeoJSON Point to Vector Tile**
+### Convert GeoJSON Point to Vector Tile
 
 ```bash
 SOURCE=ottawa-address
@@ -79,7 +79,7 @@ https://data.osmcanada.ca/{z}/{x}/{y}/csd-schools.osm
 
 [http://localhost:8111/import?new_layer=true&url=https://data.osmcanada.ca/{z}/{x}/{y}/csd-schools.osm](http://localhost:8111/import?new_layer=true&url=https://data.osmcanada.ca/{z}/{x}/{y}/csd-schools.osm)
 
-**Polygon GeoJSON (Advanced)**
+### Polygon GeoJSON (Advanced)
 
 ```bash
 SOURCE=halifax-buildings
