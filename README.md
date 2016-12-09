@@ -167,11 +167,6 @@ sqlite3 $SOURCE-z13.mbtiles '.dump' > tmp &&
     sqlite3 $SOURCE-z17.mbtiles '.dump' >> tmp &&
     sqlite3 $SOURCE.mbtiles < 'tmp'
 rm $SOURCE-z13.mbtiles $SOURCE-z14.mbtiles $SOURCE-z15.mbtiles $SOURCE-z16.mbtiles $SOURCE-z17.mbtiles tmp
-sqlite3 $SOURCE-z13.mbtiles '.dump' > tmp &&
-    sqlite3 $SOURCE-z14.mbtiles '.dump' >> tmp &&
-    sqlite3 $SOURCE-z15.mbtiles '.dump' >> tmp &&
-    sqlite3 $SOURCE.mbtiles < 'tmp'
-rm $SOURCE-z13.mbtiles $SOURCE-z14.mbtiles $SOURCE-z15.mbtiles tmp
 ```
 
 ## Configure Server
