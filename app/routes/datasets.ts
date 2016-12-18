@@ -31,6 +31,7 @@ interface DatasetRequest extends Request {
     radius: string
     subclasses: string
     intersect: string
+    inverse: string
   }
 }
 
@@ -143,7 +144,7 @@ function filterByType(results: FeatureCollection, type: string): FeatureCollecti
 /**
  * Filter by Intersect
  */
-async function filterByIntersect(results: FeatureCollection, tile: Tile, intersect: Array<string>, qa: string): Promise<FeatureCollection> {
+async function filterByIntersect(results: FeatureCollection, tile: Tile, intersect: Array<string>, qa: string, inverse = false): Promise<FeatureCollection> {
   const bbox = mercator.tileToBBox(tile)
   const qaTile = new MBTiles(qa)
   let qaData = await qaTile.getTile(getTileZoom12(tile))
@@ -154,7 +155,8 @@ async function filterByIntersect(results: FeatureCollection, tile: Tile, interse
     const points = turf.explode(feature)
     const centroid = turf.centroid(feature)
     points.features.push(centroid)
-    return turf.within(points, qaData).features.length === 0
+    if (inverse) { return turf.within(points, qaData).features.length !== 0
+    } else { return turf.within(points, qaData).features.length === 0 }
   })
   return results
 }
@@ -266,6 +268,7 @@ router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
     const wikidata = (req.query.wikidata) ? (req.query.wikidata.toLocaleLowerCase() === 'true') : undefined
     const qa = path.join(PATH, (req.query.qa) ? `${req.query.qa.replace('.mbtiles', '')}.mbtiles` : 'canada.mbtiles')
     const intersect = (req.query.intersect) ? req.query.intersect.split(',') : undefined
+    const inverse = req.query.inverse === 'true'
 
     if (cache[req.url]) {
       console.log('using cache')
@@ -281,7 +284,7 @@ router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
         if (filter) { results = filterByFilter(results, filter) }
         if (area) { results = filterByArea(results, tile, area) }
         if (wikidata) { results = await addWikidata(results, req) }
-        if (intersect) { results = await filterByIntersect(results, tile, intersect, qa) }
+        if (intersect) { results = await filterByIntersect(results, tile, intersect, qa, inverse) }
 
         // Cache results
         cache[req.url] = results
