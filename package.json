@@ -52,6 +52,7 @@
     "@types/express": "^4.0.33",
     "@types/node": "^6.0.46",
     "@types/sequelize": "^4.0.39",
+    "@types/tilebelt": "^1.0.1",
     "ava": "^0.16.0",
     "coveralls": "^2.11.13",
     "nyc": "^8.3.0",
