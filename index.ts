@@ -10,20 +10,22 @@ app.set('json spaces', 2)
 app.use(bodyParser.urlencoded({ extended: true }))
 app.set('trust proxy', true)
 
-function logging(request: Request, response: Response, next: NextFunction) {
+function logging(req: Request, res: Response, next: NextFunction) {
   const log = {
-    body: request.body,
-    ip: request.headers['x-forwarded-for'] || request.connection.remoteAddress,
-    method: request.method,
-    url: request.originalUrl,
+    body: req.body,
+    ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
+    method: req.method,
+    url: req.originalUrl,
+    params: req.params,
+    query: req.query,
   }
   console.log(log)
   next()
 }
 
-function accessControl(request: Request, response: Response, next: NextFunction) {
-  response.header('Access-Control-Allow-Origin', '*')
-  response.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,Cache-Control,Accept,Accept-Encoding')
+function accessControl(req: Request, res: Response, next: NextFunction) {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Headers', 'Content-Type,Authorization,Cache-Control,Accept,Accept-Encoding')
   next()
 }
 

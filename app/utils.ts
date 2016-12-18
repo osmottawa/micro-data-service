@@ -9,6 +9,7 @@ import Metadata, {
   MetadataInstance,
   MetadataModel } from './models/Metadata'
 import { PATH } from './configs'
+
 /**
  * Tile [x, y, z]
  */

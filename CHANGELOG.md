@@ -1,9 +1,12 @@
+## 0.5.0 - 2016-11-17
+
+- Filter results by intersecting existing OSM data based on attributes
+
 ## 0.4.2 - 2016-11-17
 
 - Add 100 concurent HTTP connections
 - Improve drasticaly Wikidata lookup (stable)
 - `--radius` instead of `--distance`
-- 
 
 ## 0.3.1 - 2016-11-13
 

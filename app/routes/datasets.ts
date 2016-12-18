@@ -1,5 +1,4 @@
-import * as turf from '@turf/helpers'
-import * as bboxPolygon from '@turf/bbox-polygon'
+import * as turf from '@turf/turf'
 import * as path from 'path'
 import * as cheapRuler from 'cheap-ruler'
 import * as mercator from 'global-mercator'
@@ -10,6 +9,7 @@ import { geojson2osm } from 'geojson2osm-es6'
 import { Tile, getFiles } from '../utils'
 import MBTiles from '../mbtiles'
 import { PATH } from '../configs'
+import * as tilebelt from 'tilebelt'
 
 const router = Router()
 const cache: any = { }
@@ -24,11 +24,13 @@ interface DatasetRequest extends Request {
     dataset: string
   }
   query: {
+    qa: string
     area: string
     filter: string
     wikidata: string
     radius: string
     subclasses: string
+    intersect: string
   }
 }
 
@@ -48,7 +50,7 @@ export function getTile(req: DatasetRequest): Tile {
 }
 
 export function getPolygon(req: Request): GeoJSON.Feature<GeoJSON.Polygon> {
-  const poly = bboxPolygon(mercator.tileToBBox(getTile(req)))
+  const poly = turf.bboxPolygon(mercator.tileToBBox(getTile(req)))
   poly.properties = {
     algorithm: 'Global Mercator',
     type: 'extent',
@@ -62,6 +64,7 @@ export function parseUrl(req: DatasetRequest): string {
 }
 
 export function parseResults(results: GeoJSON.FeatureCollection<any>, req: DatasetRequest, res: Response) {
+  console.log('Results:', results.features.length)
   if (req.params.ext === '.osm') {
     res.set('Content-Type', 'text/xml')
     return res.send(parseOSM(results))
@@ -87,6 +90,76 @@ function filterByArea(results: FeatureCollection, tile: Tile, area: number): Fea
     return results
 }
 
+/**
+ * Get Tile Zoom 12 - Used for QA Tiles
+ */
+function getTileZoom12(tile: Tile): Tile {
+  const centroid = turf.centroid(tilebelt.tileToGeoJSON(tile))
+  const [lng, lat] = centroid.geometry.coordinates
+  return tilebelt.pointToTile(lng, lat, 12)
+}
+
+/**
+ * Filter by BBox
+ */
+function filterByBBox(features: FeatureCollection, bbox: Array<number>, tile: Tile) {
+  const y = tile[1]
+  const z = tile[2]
+  const ruler = cheapRuler.fromTile(y, z)
+  const container = turf.featureCollection([])
+  container.features = features.features.filter(feature => {
+    for (const point of turf.explode(feature).features) {
+      if (ruler.insideBBox(point.geometry.coordinates, bbox)) {
+        return true
+      }
+    }
+  })
+  return container
+}
+
+/**
+ * Filter by Keys
+ */
+function filterByKeys(results: FeatureCollection, keys: Array<string>): FeatureCollection {
+  results.features = results.features.filter(feature => {
+    for (const key of keys) {
+      if (feature.properties[key]) { return true }
+    }
+    return false
+  })
+  return results
+}
+
+/**
+ * Filter by Type
+ */
+function filterByType(results: FeatureCollection, type: string): FeatureCollection {
+  results.features = results.features.filter(feature => {
+    return feature.geometry.type === 'Polygon'
+  })
+  return results
+}
+
+/**
+ * Filter by Intersect
+ */
+async function filterByIntersect(results: FeatureCollection, tile: Tile, intersect: Array<string>, qa: string): Promise<FeatureCollection> {
+  const bbox = mercator.tileToBBox(tile)
+  const qaTile = new MBTiles(qa)
+  let qaData = await qaTile.getTile(getTileZoom12(tile))
+  qaData = filterByBBox(qaData, bbox, tile)
+  qaData = filterByKeys(qaData, intersect)
+  qaData = filterByType(qaData, 'Polygon')
+  results.features = results.features.filter(feature => {
+    const points = turf.explode(feature)
+    return turf.within(points, qaData).features.length === 0
+  })
+  return results
+}
+
+/**
+ * Filter by Filter
+ */
 function filterByFilter(results: FeatureCollection, tagFilter: Array<Array<string>>): FeatureCollection {
   if (tagFilter) {
     results.features = results.features.filter(result => {
@@ -189,6 +262,8 @@ router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
     const area = (req.query.area) ? Number(req.query.area) : undefined
     const filter = (req.query.filter) ? JSON.parse(req.query.filter) : undefined
     const wikidata = (req.query.wikidata) ? (req.query.wikidata.toLocaleLowerCase() === 'true') : undefined
+    const qa = path.join(PATH, (req.query.qa) ? `${req.query.qa.replace('.mbtiles', '')}.mbtiles` : 'canada.mbtiles')
+    const intersect = (req.query.intersect) ? req.query.intersect.split(',') : undefined
 
     if (cache[req.url]) {
       console.log('using cache')
@@ -199,10 +274,14 @@ router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
     const mbtiles = new MBTiles(path.join(PATH, `${ req.params.dataset }.mbtiles`))
     mbtiles.getTile(tile)
       .then(async results => {
+        // Filters
         results = removeProperties(results, ['@user'])
-        if (filter) { results = filterByFilter(results, filter)}
+        if (filter) { results = filterByFilter(results, filter) }
         if (area) { results = filterByArea(results, tile, area) }
-        if (wikidata) { results = await addWikidata(results, req)}
+        if (wikidata) { results = await addWikidata(results, req) }
+        if (intersect) { results = await filterByIntersect(results, tile, intersect, qa) }
+
+        // Cache results
         cache[req.url] = results
         return parseResults(results, req, res)
       }, error => {
