@@ -152,6 +152,8 @@ async function filterByIntersect(results: FeatureCollection, tile: Tile, interse
   qaData = filterByType(qaData, 'Polygon')
   results.features = results.features.filter(feature => {
     const points = turf.explode(feature)
+    const centroid = turf.centroid(feature)
+    points.features.push(centroid)
     return turf.within(points, qaData).features.length === 0
   })
   return results
