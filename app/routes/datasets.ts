@@ -30,7 +30,7 @@ interface DatasetRequest extends Request {
     wikidata: string
     radius: string
     subclasses: string
-    intersect: string
+    exclude: string
     inverse: string
   }
 }
@@ -142,14 +142,19 @@ function filterByType(results: FeatureCollection, type: string): FeatureCollecti
 }
 
 /**
- * Filter by Intersect
+ * Filter by Exclude
  */
-async function filterByIntersect(results: FeatureCollection, tile: Tile, intersect: Array<string>, qa: string, inverse = false): Promise<FeatureCollection> {
+async function filterByExclude(
+  results: FeatureCollection,
+  tile: Tile,
+  exclude: Array<string>,
+  qa: string,
+  inverse = false): Promise<FeatureCollection> {
   const bbox = mercator.tileToBBox(tile)
   const qaTile = new MBTiles(qa)
   let qaData = await qaTile.getTile(getTileZoom12(tile))
   qaData = filterByBBox(qaData, bbox, tile)
-  qaData = filterByKeys(qaData, intersect)
+  qaData = filterByKeys(qaData, exclude)
   qaData = filterByType(qaData, 'Polygon')
   results.features = results.features.filter(feature => {
     const points = turf.explode(feature)
@@ -267,7 +272,7 @@ router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
     const filter = (req.query.filter) ? JSON.parse(req.query.filter) : undefined
     const wikidata = (req.query.wikidata) ? (req.query.wikidata.toLocaleLowerCase() === 'true') : undefined
     const qa = path.join(PATH, (req.query.qa) ? `${req.query.qa.replace('.mbtiles', '')}.mbtiles` : 'canada.mbtiles')
-    const intersect = (req.query.intersect) ? req.query.intersect.split(',') : undefined
+    const exclude = (req.query.exclude) ? req.query.exclude.split(',') : undefined
     const inverse = req.query.inverse === 'true'
 
     if (cache[req.url]) {
@@ -284,7 +289,7 @@ router.route('/:z(\\d+)/:x(\\d+)/:y(\\d+)/:dataset:ext(.json|.geojson|.osm|)')
         if (filter) { results = filterByFilter(results, filter) }
         if (area) { results = filterByArea(results, tile, area) }
         if (wikidata) { results = await addWikidata(results, req) }
-        if (intersect) { results = await filterByIntersect(results, tile, intersect, qa, inverse) }
+        if (exclude) { results = await filterByExclude(results, tile, exclude, qa, inverse) }
 
         // Cache results
         cache[req.url] = results
