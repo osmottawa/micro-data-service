@@ -13,7 +13,7 @@ import { PATH } from './configs'
 /**
  * Tile [x, y, z]
  */
-export type Tile = [number, number, number] | number[]
+export type Tile = [number, number, number]
 export type LngLat = [number, number]
 
 export function getFiles(path = PATH, regex = /\.mbtiles$/): Array<string> {

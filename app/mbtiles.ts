@@ -14,7 +14,7 @@ const VectorTile = require('vector-tile').VectorTile
 /**
  * Tile [x, y, z]
  */
-export type Tile = [number, number, number] | number[]
+export type Tile = [number, number, number]
 
 function gunzip(data: Buffer): Promise<Buffer> {
   return new Promise((resolve, reject) => {

@@ -97,7 +97,8 @@ function filterByArea(results: FeatureCollection, tile: Tile, area: number): Fea
 function getTileZoom12(tile: Tile): Tile {
   const centroid = turf.centroid(tilebelt.tileToGeoJSON(tile))
   const [lng, lat] = centroid.geometry.coordinates
-  return tilebelt.pointToTile(lng, lat, 12)
+  const [x, y, z] = tilebelt.pointToTile(lng, lat, 12)
+  return [x, y, z]
 }
 
 /**
