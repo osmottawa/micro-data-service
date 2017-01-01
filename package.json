@@ -30,6 +30,7 @@
     "@turf/helpers": "^3.6.3",
     "@turf/intersect": "^3.7.0",
     "@turf/nearest": "^3.7.0",
+    "@turf/turf": "^3.7.1",
     "@turf/within": "^3.7.0",
     "body-parser": "^1.15.2",
     "cheap-ruler": "^2.4.1",
