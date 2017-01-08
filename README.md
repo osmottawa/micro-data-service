@@ -84,6 +84,21 @@ https://data.osmcanada.ca/{z}/{x}/{y}/csd-schools.osm
 ```bash
 SOURCE=halifax-buildings
 
+# Zoom 12
+tippecanoe \
+    --output=$SOURCE-z12.mbtiles \
+    --force \
+    --minimum-zoom 12 \
+    --maximum-zoom 12 \
+    --full-detail 20 \
+    --no-line-simplification \
+    --no-feature-limit \
+    --no-tile-size-limit \
+    --no-polygon-splitting \
+    --no-clipping \
+    --no-duplication \
+    $SOURCE.geojson
+
 # Zoom 13
 tippecanoe \
     --output=$SOURCE-z13.mbtiles \
@@ -161,12 +176,13 @@ tippecanoe \
 
 # Merge SQLite together
 sqlite3 $SOURCE-z13.mbtiles '.dump' > tmp &&
+    sqlite3 $SOURCE-z12.mbtiles '.dump' > tmp &&
     sqlite3 $SOURCE-z14.mbtiles '.dump' >> tmp &&
     sqlite3 $SOURCE-z15.mbtiles '.dump' >> tmp &&
     sqlite3 $SOURCE-z16.mbtiles '.dump' >> tmp &&
     sqlite3 $SOURCE-z17.mbtiles '.dump' >> tmp &&
     sqlite3 $SOURCE.mbtiles < 'tmp'
-rm $SOURCE-z13.mbtiles $SOURCE-z14.mbtiles $SOURCE-z15.mbtiles $SOURCE-z16.mbtiles $SOURCE-z17.mbtiles tmp
+rm $SOURCE-z12.mbtiles $SOURCE-z13.mbtiles $SOURCE-z14.mbtiles $SOURCE-z15.mbtiles $SOURCE-z16.mbtiles $SOURCE-z17.mbtiles tmp
 ```
 
 ## Configure Server
