@@ -21,7 +21,7 @@ Using [`tippecanoe`](https://github.com/mapbox/tippecanoe) you can generate Vect
 **Log into server**
 
 ```bash
-$ ssh root@data.osmcanada.ca
+$ ssh ubuntu@data.osmcanada.com
 ```
 
 You will be adding the Vector Tiles `.mbtiles` inside the `/data` folder.
