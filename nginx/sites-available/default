@@ -6,8 +6,7 @@ server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
 
-    server_name data.osmcanada.ca;
-
+    server_name data.osmcanada.com;
     ssl_certificate             /etc/letsencrypt/live/data.osmcanada.ca/fullchain.pem;
     ssl_certificate_key         /etc/letsencrypt/live/data.osmcanada.ca/privkey.pem;
     ssl_trusted_certificate     /etc/letsencrypt/live/data.osmcanada.ca/fullchain.pem;
@@ -18,11 +17,12 @@ server {
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     }
+
 }
 
 server {
-    server_name www.data.osmcanada.ca data.osmcanada.ca;
-    return 301 https://data.osmcanada.ca$request_uri;
+    server_name data.osmcanada.com data.osmcanada.ca;
+    return 301 https://data.osmcanada.com$request_uri;
 }
 
 server {
@@ -33,6 +33,7 @@ server {
     ssl_certificate_key         /etc/letsencrypt/live/data.osmcanada.ca/privkey.pem;
     ssl_trusted_certificate     /etc/letsencrypt/live/data.osmcanada.ca/fullchain.pem;
 
-    server_name www.data.osmcanada.ca data.osmcanada.ca;
-    return 301 https://data.osmcanada.ca$request_uri;
+    server_name data.osmcanada.ca;
+    return 301 https://data.osmcanada.com$request_uri;
+
 }
