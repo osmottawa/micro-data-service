@@ -1,4 +1,4 @@
-FROM node
+FROM node:8
 MAINTAINER Denis Carriere <carriere.denis@gmail.com>
 
 # Create app directory
