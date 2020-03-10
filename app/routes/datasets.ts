@@ -50,7 +50,7 @@ export function getTile(req: DatasetRequest): Tile {
   return [Number(req.params.x), Number(req.params.y), Number(req.params.z)]
 }
 
-export function getPolygon(req: Request): GeoJSON.Feature<GeoJSON.Polygon> {
+export function getPolygon(req: any): GeoJSON.Feature<GeoJSON.Polygon> {
   const poly = turf.bboxPolygon(mercator.tileToBBox(getTile(req)))
   poly.properties = {
     algorithm: 'Global Mercator',
@@ -104,14 +104,15 @@ function getTileZoom12(tile: Tile): Tile {
 /**
  * Filter by BBox
  */
-function filterByBBox(features: FeatureCollection, bbox: Array<number>, tile: Tile) {
+function filterByBBox(features: FeatureCollection, bbox: [number, number, number, number], tile: Tile) {
   const y = tile[1]
   const z = tile[2]
   const ruler = cheapRuler.fromTile(y, z)
   const container = turf.featureCollection([])
   container.features = features.features.filter(feature => {
     for (const point of turf.explode(feature).features) {
-      if (ruler.insideBBox(point.geometry.coordinates, bbox)) {
+      const coords = point.geometry.coordinates;
+      if (ruler.insideBBox([coords[0], coords[1]], bbox)) {
         return true
       }
     }
@@ -153,7 +154,7 @@ async function filterByExclude(
   inverse = false): Promise<FeatureCollection> {
   const bbox = mercator.tileToBBox(tile)
   const qaTile = new MBTiles(qa)
-  let qaData = await qaTile.getTile(getTileZoom12(tile))
+  let qaData: any = await qaTile.getTile(getTileZoom12(tile))
   qaData = filterByBBox(qaData, bbox, tile)
   qaData = filterByKeys(qaData, exclude)
   qaData = filterByType(qaData, 'Polygon')

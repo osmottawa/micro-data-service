@@ -24,7 +24,7 @@ export interface TilesModel extends Sequelize.Model<TilesInstance, TilesAttribut
 /**
  * Tiles Scheme for MBTiles SQL Model
  */
-const scheme: DefineAttributes = {
+const scheme: any = {
   tile_column: { type: INTEGER },
   tile_data: { type: BLOB },
   tile_row: { type: INTEGER },

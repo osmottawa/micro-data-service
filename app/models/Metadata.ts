@@ -22,7 +22,7 @@ export interface MetadataModel extends Sequelize.Model<MetadataInstance, Metadat
 /**
  * Metadata Scheme for MBTiles SQL Model
  */
-const scheme: DefineAttributes = {
+const scheme: any = {
   name: { primaryKey: true, type: TEXT, unique: true },
   value: { allowNull: false, type: TEXT },
 }
